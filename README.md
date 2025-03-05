@@ -1,2 +1,2 @@
 # ikakbolit
-A backend for mobile app for medicine scheduling
+A backend of mobile app for medicine scheduling
