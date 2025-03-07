@@ -2,8 +2,10 @@ package repo
 
 import (
 	"context"
-
+	"errors"
+	"fmt"
 	"github.com/infinity-ocean/ikakbolit/internal/model"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -15,21 +17,21 @@ func New(pool *pgxpool.Pool) *repo {
 	return &repo{pool: pool}
 }
 
-func (r *repo) InsertSchedule(sched model.ScheduleDB) (int, error) {
+func (r *repo) InsertSchedule(sched model.Schedule) (int, error) {
 	conn, err := r.pool.Acquire(context.Background())
 	if err != nil {
 		return 0, err
 	}
 	defer conn.Release()
 	var id int
-	sql := `INSERT INTO scheduled (user_id, cure_name, frequency, duration, created_at) 
+	sql := `INSERT INTO scheduled (user_id, cure_name, doses_per_day, duration, created_at) 
 			VALUES ($1, $2, $3, $4, $5)						
 			RETURNING id;`
 	err = conn.QueryRow(
 		context.Background(),
 		sql, sched.UserID,
 		sched.CureName,
-		sched.Frequency,
+		sched.DosesPerDay,
 		sched.Duration,
 		sched.CreatedAt).
 		Scan(&id)
@@ -67,4 +69,35 @@ func (r *repo) SelectSchedules(userID int) ([]int, error) {
 	}
 
 	return scheduleIDs, nil
+}
+
+func (r *repo) SelectSchedule(userID int, schedID int) (model.Schedule, error) {
+	conn, err := r.pool.Acquire(context.Background())
+	if err != nil {
+		return model.Schedule{}, err
+	}
+	defer conn.Release()
+
+	sql := `SELECT id, user_id, cure_name, doses_per_day, duration, created_at 
+			FROM scheduled 
+			WHERE user_id = $1 AND id = $2`
+
+	row := conn.QueryRow(context.Background(), sql, userID, schedID)
+
+	var schedule model.Schedule
+	err = row.Scan(
+		&schedule.ID,
+		&schedule.UserID,
+		&schedule.CureName,
+		&schedule.DosesPerDay,
+		&schedule.Duration,
+		&schedule.CreatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return model.Schedule{}, fmt.Errorf("schedule not found for user_id=%d, schedID=%d", userID, schedID)
+		}
+		return model.Schedule{}, err
+	}
+	return schedule, nil
 }
