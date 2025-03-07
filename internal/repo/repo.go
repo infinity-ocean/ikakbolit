@@ -37,5 +37,4 @@ func (r *repo) InsertSchedule(sched model.ScheduleDB) (int, error) {
 		return 0, err
 	}
 	return id, nil
-
 }

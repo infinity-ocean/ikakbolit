@@ -15,7 +15,7 @@ func New(repo repo) *service {
 }
 
 func (s *service) AddSchedule(scheduleReq model.ScheduleRequest) (int, error) {
-	scheduleDB, err := model.ToScheduleDB(scheduleReq)
+	scheduleDB, err := ToScheduleDB(scheduleReq)
 	if err != nil {
 		return 0, err
 	}

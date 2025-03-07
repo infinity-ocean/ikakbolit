@@ -2,7 +2,7 @@ package controller
 
 import (
 	"encoding/json"
-	"errors"
+
 	"fmt"
 	"net/http"
 	"strconv"
@@ -25,6 +25,7 @@ GET /next_takings?user_id=       [Размер периода за
 
 type service interface {
 	AddSchedule(model.ScheduleRequest) (int, error) 
+	GetSchedules(int) ([]int, error)
 }
 
 func New(svc service, port string) *controller {
@@ -33,7 +34,8 @@ func New(svc service, port string) *controller {
 
 func (c *controller) Run() error {
 	router := mux.NewRouter()
-	router.HandleFunc("/schedule", httpWrapper(c.addSchedule))
+	router.HandleFunc("POST /schedule", httpWrapper(c.addSchedule))
+	router.HandleFunc("GET /schedules", httpWrapper(c.getSchedules)) //TODO как получать флаги в хэндлере?
 	fmt.Println("Starting server on ", c.listenPort)
 	if err := http.ListenAndServe(c.listenPort, router); err != nil {
 		return err
@@ -42,20 +44,29 @@ func (c *controller) Run() error {
 }
 
 func (c *controller) addSchedule(w http.ResponseWriter, r *http.Request) error {
-	if r.Method != "POST" {
-		return errors.New("method for schedule creation isn't POST")
-	}
-	schedule := &model.ScheduleRequest{}
+	schedule := &ScheduleRequest{}
 	if err := json.NewDecoder(r.Body).Decode(schedule); err != nil {
 		return err
 	}
-
-	scheduleID, err := c.service.AddSchedule(*schedule)
+	scheduleModel := model.ScheduleRequest(*schedule)
+	scheduleID, err := c.service.AddSchedule(scheduleModel)
 	if err != nil {
 		return err
 	}
-	response := make(map[string]string)
-	response["schedule_id"] = strconv.Itoa(scheduleID)
+
+	response := Response{}
+	response.Schedule_id = strconv.Itoa(scheduleID)
 	return writeJSONtoHTTP(w, http.StatusOK, response)
 }
 
+// func (c *controller) getSchedules(w http.ResponseWriter, r *http.Request) error {
+// 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
+// 	if err != nil {
+// 		return err
+// 	}
+// 	response, err := c.service.GetSchedules(userID)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return writeJSONtoHTTP(w, http.StatusOK, response)
+// }

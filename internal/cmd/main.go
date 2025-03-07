@@ -4,15 +4,14 @@ import (
 	"log"
 
 	"github.com/infinity-ocean/ikakbolit/internal/config"
+	"github.com/infinity-ocean/ikakbolit/internal/controller"
 	"github.com/infinity-ocean/ikakbolit/internal/repo"
 	"github.com/infinity-ocean/ikakbolit/internal/service"
-	"github.com/infinity-ocean/ikakbolit/internal/controller"
 )
 
-	
 func main() {
 	log.Println("program is started")
-	
+
 	conf := config.Config{}
 	if err := conf.Parse(); err != nil {
 		log.Println(err)
