@@ -38,3 +38,33 @@ func (r *repo) InsertSchedule(sched model.ScheduleDB) (int, error) {
 	}
 	return id, nil
 }
+
+func (r *repo) SelectSchedules(userID int) ([]int, error) {
+	conn, err := r.pool.Acquire(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	sql := `SELECT id FROM scheduled WHERE user_id = $1`
+	rows, err := conn.Query(context.Background(), sql, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var scheduleIDs []int
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		scheduleIDs = append(scheduleIDs, id)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return scheduleIDs, nil
+}

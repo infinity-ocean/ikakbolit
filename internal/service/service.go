@@ -8,6 +8,7 @@ type service struct {
 
 type repo interface {
 	InsertSchedule(model.ScheduleDB) (int, error)
+	SelectSchedules(int) ([]int, error)
 }
 
 func New(repo repo) *service {
@@ -21,4 +22,8 @@ func (s *service) AddSchedule(scheduleReq model.ScheduleRequest) (int, error) {
 	}
 
 	return s.repo.InsertSchedule(scheduleDB)
+}
+
+func (s *service) GetSchedules(userID int) ([]int, error) {
+	return s.repo.SelectSchedules(userID)
 }

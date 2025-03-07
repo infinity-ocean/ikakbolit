@@ -34,8 +34,8 @@ func New(svc service, port string) *controller {
 
 func (c *controller) Run() error {
 	router := mux.NewRouter()
-	router.HandleFunc("POST /schedule", httpWrapper(c.addSchedule))
-	router.HandleFunc("GET /schedules", httpWrapper(c.getSchedules)) //TODO как получать флаги в хэндлере?
+	router.HandleFunc("/schedule", httpWrapper(c.addSchedule)).Methods("POST")
+	router.HandleFunc("/schedules", httpWrapper(c.getSchedules)).Methods("GET")
 	fmt.Println("Starting server on ", c.listenPort)
 	if err := http.ListenAndServe(c.listenPort, router); err != nil {
 		return err
@@ -59,14 +59,14 @@ func (c *controller) addSchedule(w http.ResponseWriter, r *http.Request) error {
 	return writeJSONtoHTTP(w, http.StatusOK, response)
 }
 
-// func (c *controller) getSchedules(w http.ResponseWriter, r *http.Request) error {
-// 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
-// 	if err != nil {
-// 		return err
-// 	}
-// 	response, err := c.service.GetSchedules(userID)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return writeJSONtoHTTP(w, http.StatusOK, response)
-// }
+func (c *controller) getSchedules(w http.ResponseWriter, r *http.Request) error {
+	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
+	if err != nil {
+		return err
+	}
+	response, err := c.service.GetSchedules(userID)
+	if err != nil {
+		return err
+	}
+	return writeJSONtoHTTP(w, http.StatusOK, response)
+}
