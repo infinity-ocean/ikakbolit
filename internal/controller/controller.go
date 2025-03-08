@@ -25,8 +25,9 @@ GET /next_takings?user_id=       [Размер периода за
 
 type service interface {
 	AddSchedule(model.Schedule) (int, error) 
-	GetSchedules(int) ([]int, error)
-	GetSchedule(int, int) (model.Schedule, []string, error)
+	GetScheduleIDs(int) ([]int, error)
+	GetScheduleWithIntake(int, int) (model.Schedule, error)
+	GetNextTakings(int) ([]model.Schedule, error)
 }
 
 func New(svc service, port string) *controller {
@@ -38,6 +39,7 @@ func (c *controller) Run() error {
 	router.HandleFunc("/schedule", httpWrapper(c.addSchedule)).Methods("POST")
 	router.HandleFunc("/schedules", httpWrapper(c.getSchedules)).Methods("GET")
 	router.HandleFunc("/schedule", httpWrapper(c.getSchedule)).Methods("GET")
+	router.HandleFunc("/next_takings", httpWrapper(c.getNextTakings)).Methods("GET")
 	fmt.Println("Starting server on ", c.listenPort)
 	if err := http.ListenAndServe(c.listenPort, router); err != nil {
 		return err
@@ -46,7 +48,7 @@ func (c *controller) Run() error {
 }
 
 func (c *controller) addSchedule(w http.ResponseWriter, r *http.Request) error {
-	schedule := &ScheduleRequest{}
+	schedule := &Schedule{}
 	if err := json.NewDecoder(r.Body).Decode(schedule); err != nil {
 		return err
 	}
@@ -66,7 +68,7 @@ func (c *controller) getSchedules(w http.ResponseWriter, r *http.Request) error 
 	if err != nil {
 		return err
 	}
-	response, err := c.service.GetSchedules(userID)
+	response, err := c.service.GetScheduleIDs(userID)
 	if err != nil {
 		return err
 	}
@@ -82,10 +84,28 @@ func (c *controller) getSchedule(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	schedule, intakes, err := c.service.GetSchedule(userID, scheduleID)
+	response, err := c.service.GetScheduleWithIntake(userID, scheduleID)
 	if err != nil {
 		return err
 	}
-	response := toScheduleWithIntakes(schedule, intakes)
+	return writeJSONtoHTTP(w, http.StatusOK, response)
+}
+
+func (c *controller) getNextTakings(w http.ResponseWriter, r *http.Request) error {
+	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
+	if err != nil {
+		return err
+	}
+	schedulesRaw, err := c.service.GetNextTakings(userID)
+	if err != nil {
+		return err
+	}
+	schedules := make([]Schedule, 0, len(schedulesRaw))
+	for _, s := range schedulesRaw {
+		schedules = append(schedules, Schedule(s))
+	}
+	response := SchedulesInWindow{
+		Schedules: schedules,
+	}
 	return writeJSONtoHTTP(w, http.StatusOK, response)
 }

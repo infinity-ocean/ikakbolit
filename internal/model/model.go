@@ -14,6 +14,6 @@ type Schedule struct {
 
 	DayStart  time.Time
 	DayFinish time.Time
+
+	Intakes     []string
 }
-
-

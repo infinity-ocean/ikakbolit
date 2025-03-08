@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/infinity-ocean/ikakbolit/internal/model"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -24,16 +26,15 @@ func (r *repo) InsertSchedule(sched model.Schedule) (int, error) {
 	}
 	defer conn.Release()
 	var id int
-	sql := `INSERT INTO scheduled (user_id, cure_name, doses_per_day, duration, created_at) 
-			VALUES ($1, $2, $3, $4, $5)						
+	sql := `INSERT INTO scheduled (user_id, cure_name, doses_per_day, duration) 
+			VALUES ($1, $2, $3, $4)						
 			RETURNING id;`
 	err = conn.QueryRow(
 		context.Background(),
 		sql, sched.UserID,
 		sched.CureName,
 		sched.DosesPerDay,
-		sched.Duration,
-		sched.CreatedAt).
+		sched.Duration).
 		Scan(&id)
 	if err != nil {
 		return 0, err
@@ -41,35 +42,44 @@ func (r *repo) InsertSchedule(sched model.Schedule) (int, error) {
 	return id, nil
 }
 
-func (r *repo) SelectSchedules(userID int) ([]int, error) {
+func (r *repo) SelectSchedules(userID int) ([]model.Schedule, error) {
 	conn, err := r.pool.Acquire(context.Background())
 	if err != nil {
 		return nil, err
 	}
 	defer conn.Release()
 
-	sql := `SELECT id FROM scheduled WHERE user_id = $1`
+	sql := `
+		SELECT id, user_id, cure_name, doses_per_day, duration, created_at 
+		FROM scheduled 
+		WHERE user_id = $1
+	`
 	rows, err := conn.Query(context.Background(), sql, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var scheduleIDs []int
+	var schedules []model.Schedule
 	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
+		var s Schedule
+		var duration int64
+
+		if err := rows.Scan(&s.ID, &s.UserID, &s.CureName, &s.DosesPerDay, &duration, &s.CreatedAt); err != nil {
 			return nil, err
 		}
-		scheduleIDs = append(scheduleIDs, id)
+
+		s.Duration = time.Duration(duration)
+		schedules = append(schedules, model.Schedule(s))
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return scheduleIDs, nil
+	return schedules, nil
 }
+
 
 func (r *repo) SelectSchedule(userID int, schedID int) (model.Schedule, error) {
 	conn, err := r.pool.Acquire(context.Background())

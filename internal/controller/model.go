@@ -10,16 +10,21 @@ type Response struct {
 	Schedule_id string `json:"schedule_id"`
 }
 
-type ScheduleRequest struct {
+type Schedule struct {
 	ID          int
 	UserID      string        `json:"user_id"`
 	CureName    string        `json:"cure_name"`
-	DosesPerDay int           `json:"DosesPerDay"`
+	DosesPerDay int           `json:"doses_per_day"`
 	Duration    time.Duration `json:"duration"`
 	CreatedAt   time.Time     `json:"created_at"`
+
+	DayStart    time.Time     `json:"-"`
+	DayFinish   time.Time     `json:"-"`
+	
+	Intakes     []string      `json:"intakes"`
 }
 
-func toModelSchedule(s ScheduleRequest) model.Schedule {
+func toModelSchedule(s Schedule) model.Schedule {
 	return model.Schedule{
 		ID:          s.ID,
 		UserID:      s.UserID,
@@ -30,24 +35,6 @@ func toModelSchedule(s ScheduleRequest) model.Schedule {
 	}
 }
 
-type ScheduleWithIntakes struct {
-	ID          int           `id:"user_id"`
-	UserID      string        `json:"user_id"`
-	CureName    string        `json:"cure_name"`
-	DosesPerDay int           `json:"DosesPerDay"`
-	Duration    time.Duration `json:"duration"`
-	CreatedAt   time.Time     `json:"created_at"`
-	Intakes     []string      `json:"intakes"`
-}
-
-func toScheduleWithIntakes(s model.Schedule, intakes []string) ScheduleWithIntakes {
-	return ScheduleWithIntakes{
-		ID:          s.ID,
-		UserID:      s.UserID,
-		CureName:    s.CureName,
-		DosesPerDay: s.DosesPerDay,
-		Duration:    s.Duration,
-		CreatedAt:   s.CreatedAt,
-		Intakes:     intakes,
-	}
+type SchedulesInWindow struct {
+	Schedules []Schedule `json:"schedules"`
 }
