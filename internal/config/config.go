@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -16,8 +17,8 @@ type Config struct {
 }
 
 func (c* Config) Parse() error {
-	if err := godotenv.Load("../../.env"); err != nil {
-		return err
+	if err := godotenv.Load(); err != nil {
+		log.Fatal(err)
 	}
 	c.PG_HOST = os.Getenv("POSTGRES_HOST")
 	c.PG_DB   = os.Getenv("POSTGRES_DB")

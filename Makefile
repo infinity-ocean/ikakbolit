@@ -7,7 +7,7 @@ LOCAL_BIN := $(CURDIR)/bin
 MIGRATIONS_DIR := ./migrations
 
 run:
-	go run .
+	go run internal/cmd/main.go
 
 start-infra:
 	docker-compose up -d
@@ -20,12 +20,9 @@ print-dsn:
 	
 migration-up:
 	$(LOCAL_BIN)/goose $(opts) -allow-missing -dir $(MIGRATIONS_DIR) postgres "$(POSTGRES_DSN)" up
+
 migration-down:
 	$(LOCAL_BIN)/goose $(opts) -dir $(MIGRATIONS_DIR) postgres "$(POSTGRES_DSN)" down
-migration-one:
-	$(LOCAL_BIN)/goose $(opts) -allow-missing -dir $(MIGRATIONS_DIR) postgres "$(POSTGRES_DSN)" up-by-one
-migration-status:
-	$(LOCAL_BIN)/goose $(opts) -dir $(MIGRATIONS_DIR) postgres "$(POSTGRES_DSN)" status
 
 install-deps:
 	GOBIN=$(LOCAL_BIN) go install github.com/pressly/goose/v3/cmd/goose@v3.18.0
