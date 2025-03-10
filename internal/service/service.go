@@ -20,22 +20,26 @@ type repo interface {
 	SelectSchedule(int, int) (model.Schedule, error)
 }
 
+var (
+	ErrInvalidDoses       = errors.New("doses per day must be between 1 and 24")
+	ErrNoUpcomingSchedules = errors.New("no schedules has found: expired or non exist")
+)
+
 func New(repo repo) *service {
 	return &service{repo: repo}
 }
 
 func (s *service) AddSchedule(schedule model.Schedule) (int, error) {
 	if schedule.DosesPerDay < 1 || schedule.DosesPerDay > 24 {
-		return 0, errors.New("doses per day is <1 or >24")
+		return 0, ErrInvalidDoses
 	}
-
 	return s.repo.InsertSchedule(schedule)
 }
 
 func (s *service) GetScheduleIDs(userID int) ([]int, error) {
 	schedules, err := s.repo.SelectSchedules(userID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get schedule IDs: %w", err)
 	}
 	idSlice := make([]int, 0, len(schedules))
 	for _, schedule := range schedules {
@@ -47,11 +51,11 @@ func (s *service) GetScheduleIDs(userID int) ([]int, error) {
 func (s *service) GetScheduleWithIntake(userID int, scheduleID int) (model.Schedule, error) {
 	schedule, err := s.repo.SelectSchedule(userID, scheduleID)
 	if err != nil {
-		return model.Schedule{}, err
+		return model.Schedule{}, fmt.Errorf("failed to get schedule: %w", err)
 	}
 	intakes, err := CalculateIntakeTimes(schedule.DosesPerDay)
 	if err != nil {
-		return model.Schedule{}, err
+		return model.Schedule{}, fmt.Errorf("failed to calculate intake times: %w", err)
 	}
 	schedule.Intakes = intakes
 	return schedule, nil
@@ -60,7 +64,7 @@ func (s *service) GetScheduleWithIntake(userID int, scheduleID int) (model.Sched
 func (s *service) GetNextTakings(userID int) ([]model.Schedule, error) {
 	schedules, err := s.repo.SelectSchedules(userID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get schedules: %w", err)
 	}
 
 	window, err := strconv.Atoi(os.Getenv("CURE_SCHEDULE_WINDOW_MIN"))
@@ -70,12 +74,12 @@ func (s *service) GetNextTakings(userID int) ([]model.Schedule, error) {
 	windowDuration := time.Duration(window) * time.Minute
 
 	now := time.Now()
-	result := make([]model.Schedule, 0, len(schedules))
+	var result []model.Schedule
 
 	for _, schedule := range schedules {
 		times, err := CalculateIntakeTimes(schedule.DosesPerDay)
 		if err != nil {
-			return nil, fmt.Errorf("failed to calculate intake times for schedule %d: %w", schedule.ID, err)
+			return nil, fmt.Errorf("failed to calculate intake times: %w", err)
 		}
 		schedule.Intakes = times
 
@@ -94,18 +98,19 @@ func (s *service) GetNextTakings(userID int) ([]model.Schedule, error) {
 		}
 	}
 
+	if len(result) == 0 {
+		return nil, ErrNoUpcomingSchedules
+	}
+
 	return result, nil
 }
 
-
-
-// TODO change duration nanoseconds to days
 func CalculateIntakeTimes(dosesPerDay int) ([]string, error) {
 	dayStartStr := os.Getenv("DAY_START")
 	dayFinishStr := os.Getenv("DAY_FINISH")
 
 	if dayStartStr == "" || dayFinishStr == "" {
-		return nil, fmt.Errorf("environment variables DAY_START or DAY_FINISH are not set")
+		return nil, errors.New("environment variables DAY_START or DAY_FINISH are not set")
 	}
 
 	dayStart, err := time.Parse("15:04", dayStartStr)

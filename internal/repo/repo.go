@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/infinity-ocean/ikakbolit/internal/model"
 	"github.com/jackc/pgx/v5"
@@ -20,32 +19,29 @@ func New(pool *pgxpool.Pool) *repo {
 }
 
 func (r *repo) InsertSchedule(sched model.Schedule) (int, error) {
-	conn, err := r.pool.Acquire(context.Background())
+	ctx := context.Background()
+	conn, err := r.pool.Acquire(ctx)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to acquire connection: %w", err)
 	}
 	defer conn.Release()
+
 	var id int
-	sql := `INSERT INTO scheduled (user_id, cure_name, doses_per_day, duration) 
-			VALUES ($1, $2, $3, $4)						
-			RETURNING id;`
-	err = conn.QueryRow(
-		context.Background(),
-		sql, sched.UserID,
-		sched.CureName,
-		sched.DosesPerDay,
-		sched.Duration).
-		Scan(&id)
+	query := `INSERT INTO scheduled (user_id, cure_name, doses_per_day, duration) 
+			  VALUES ($1, $2, $3, $4) RETURNING id;`
+
+	err = conn.QueryRow(ctx, query, sched.UserID, sched.CureName, sched.DosesPerDay, sched.Duration).Scan(&id)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to insert schedule: %w", err)
 	}
+
 	return id, nil
 }
 
 func (r *repo) SelectSchedules(userID int) ([]model.Schedule, error) {
 	conn, err := r.pool.Acquire(context.Background())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to acquire connection: %w", err)
 	}
 	defer conn.Release()
 
@@ -56,35 +52,34 @@ func (r *repo) SelectSchedules(userID int) ([]model.Schedule, error) {
 	`
 	rows, err := conn.Query(context.Background(), sql, userID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to select schedules: %w", err)
 	}
 	defer rows.Close()
 
 	var schedules []model.Schedule
 	for rows.Next() {
-		var s Schedule
-		var duration int64
+		var s model.Schedule
+		var duration int
 
 		if err := rows.Scan(&s.ID, &s.UserID, &s.CureName, &s.DosesPerDay, &duration, &s.CreatedAt); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
 
-		s.Duration = time.Duration(duration)
-		schedules = append(schedules, model.Schedule(s))
+		s.Duration = duration
+		schedules = append(schedules, s)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("rows iteration error: %w", err)
 	}
 
 	return schedules, nil
 }
 
-
 func (r *repo) SelectSchedule(userID int, schedID int) (model.Schedule, error) {
 	conn, err := r.pool.Acquire(context.Background())
 	if err != nil {
-		return model.Schedule{}, err
+		return model.Schedule{}, fmt.Errorf("failed to acquire connection: %w", err)
 	}
 	defer conn.Release()
 
@@ -105,9 +100,9 @@ func (r *repo) SelectSchedule(userID int, schedID int) (model.Schedule, error) {
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return model.Schedule{}, fmt.Errorf("schedule not found for user_id=%d, schedID=%d", userID, schedID)
+			return model.Schedule{}, fmt.Errorf("schedule not found for user_id=%d, schedID=%d: %w", userID, schedID, err)
 		}
-		return model.Schedule{}, err
+		return model.Schedule{}, fmt.Errorf("failed to scan schedule: %w", err)
 	}
 	return schedule, nil
 }

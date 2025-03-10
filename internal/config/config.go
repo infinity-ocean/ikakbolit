@@ -7,7 +7,6 @@ import (
 )
 
 type Config struct {
-//TODO  CURE TIME RETRIEVING OFFSET
 	PG_HOST string
 	PG_DB   string
 	PG_USER string
@@ -20,7 +19,6 @@ func (c* Config) Parse() error {
 	if err := godotenv.Load("../../.env"); err != nil {
 		return err
 	}
-	//TODO  CURE TIME RETRIEVING OFFSET
 	c.PG_HOST = os.Getenv("POSTGRES_HOST")
 	c.PG_DB   = os.Getenv("POSTGRES_DB")
 	c.PG_USER = os.Getenv("POSTGRES_USER")
@@ -30,7 +28,6 @@ func (c* Config) Parse() error {
 
 	missingFields := []string{}
 
-	//TODO  CURE TIME RETRIEVING OFFSET
 	if c.PG_HOST == "" {
 		missingFields = append(missingFields, "POSTGRES_HOST")
 	}

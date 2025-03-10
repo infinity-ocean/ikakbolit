@@ -1,0 +1,251 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is the main entry point for the Ikakbolit application, which sets up and runs the application server.",
+        "title": "ikakbolit API",
+        "contact": {
+            "name": "Константин Троицкий",
+            "url": "https://t.me/debussy3",
+            "email": "varrr7@gmail.com"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/next_takings": {
+            "get": {
+                "description": "Retrieve upcoming medication schedules for a user",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get next scheduled takings",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.SchedulesInWindow"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/schedule": {
+            "get": {
+                "description": "Retrieve a schedule by user ID and schedule ID",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get a specific schedule",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Schedule ID",
+                        "name": "schedule_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Schedule"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.APIError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new schedule for a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Add a new schedule",
+                "parameters": [
+                    {
+                        "description": "Schedule data",
+                        "name": "schedule",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.Schedule"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/schedules": {
+            "get": {
+                "description": "Retrieve schedule IDs for a given user",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get user schedules",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.APIError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "controller.APIError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.Response": {
+            "type": "object",
+            "properties": {
+                "schedule_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.Schedule": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "cure_name": {
+                    "type": "string"
+                },
+                "doses_per_day": {
+                    "type": "integer"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "intakes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.SchedulesInWindow": {
+            "type": "object",
+            "properties": {
+                "schedules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.Schedule"
+                    }
+                }
+            }
+        },
+        "model.Schedule": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "cureName": {
+                    "type": "string"
+                },
+                "dayFinish": {
+                    "type": "string"
+                },
+                "dayStart": {
+                    "type": "string"
+                },
+                "dosesPerDay": {
+                    "type": "integer"
+                },
+                "duration": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "intakes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

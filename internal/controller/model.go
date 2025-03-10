@@ -15,7 +15,7 @@ type Schedule struct {
 	UserID      string        `json:"user_id"`
 	CureName    string        `json:"cure_name"`
 	DosesPerDay int           `json:"doses_per_day"`
-	Duration    time.Duration `json:"duration"`
+	Duration    int           `json:"duration"`
 	CreatedAt   time.Time     `json:"created_at"`
 
 	DayStart    time.Time     `json:"-"`
