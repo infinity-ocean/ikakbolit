@@ -6,9 +6,6 @@ export
 LOCAL_BIN := $(CURDIR)/bin
 MIGRATIONS_DIR := ./migrations
 
-run:
-	go run internal/cmd/main.go
-
 start-infra:
 	docker-compose up -d
 
