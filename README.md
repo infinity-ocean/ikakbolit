@@ -28,8 +28,6 @@ cd ikakbolit
 Создай `.env` файл и укажи необходимые настройки для подключения к базе данных:
 
 ```ini
-Копировать
-Редактировать
 POSTGRES_HOST=localhost       # Хост базы данных
 POSTGRES_PORT=5432            # Порт подключения к PostgreSQL
 POSTGRES_USER=postgres        # Имя пользователя БД
