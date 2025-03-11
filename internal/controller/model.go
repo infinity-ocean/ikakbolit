@@ -6,13 +6,15 @@ import (
 	"github.com/infinity-ocean/ikakbolit/internal/model"
 )
 
-type Response struct {
+// @name responseScheduleID
+type responseScheduleID struct {
 	Schedule_id string `json:"schedule_id"`
 }
 
+// swagger:model Schedule
 type Schedule struct {
 	ID          int
-	UserID      string        `json:"user_id"`
+	UserID      int           `json:"user_id"`
 	CureName    string        `json:"cure_name"`
 	DosesPerDay int           `json:"doses_per_day"`
 	Duration    int           `json:"duration"`
@@ -35,6 +37,12 @@ func toModelSchedule(s Schedule) model.Schedule {
 	}
 }
 
+// swagger:model ScheduleInWindow
 type SchedulesInWindow struct {
 	Schedules []Schedule `json:"schedules"`
+}
+
+// swagger:model APIError
+type APIError struct {
+    Message string `json:"message"`
 }

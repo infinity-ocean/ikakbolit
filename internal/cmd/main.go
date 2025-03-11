@@ -2,11 +2,12 @@ package main
 
 import (
 	"log"
+
 	"github.com/infinity-ocean/ikakbolit/internal/config"
 	"github.com/infinity-ocean/ikakbolit/internal/controller"
 	"github.com/infinity-ocean/ikakbolit/internal/repo"
 	"github.com/infinity-ocean/ikakbolit/internal/service"
-
+	"github.com/joho/godotenv"
 )
 
 // @title ikakbolit API
@@ -22,6 +23,12 @@ import (
 func main() {
 	log.Println("program is started")
 
+	if err := godotenv.Load(); err != nil {
+		if err := godotenv.Load("../../.env"); err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	conf := config.Config{}
 	if err := conf.Parse(); err != nil {
 		log.Println(err)
@@ -35,7 +42,6 @@ func main() {
 	repo := repo.New(pool)
 	svc := service.New(repo)
 	ctrl := controller.New(svc, ":8080")
-
 
 	if err := ctrl.Run(); err != nil {
 		log.Println(err)

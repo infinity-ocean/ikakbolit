@@ -4,7 +4,7 @@ import "time"
 
 type Schedule struct {
 	ID          int           `db:"id"`
-	UserID      string        `db:"fk_user_id"`
+	UserID      int        `db:"fk_user_id"`
 	CureName    string        `db:"cure_name"`
 	DosesPerDay int           `db:"frequency"`
 	Duration    int 		  `db:"duration"`

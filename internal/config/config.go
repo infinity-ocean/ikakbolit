@@ -1,10 +1,8 @@
 package config
 
 import (
-	"log"
+	"errors"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -17,9 +15,7 @@ type Config struct {
 }
 
 func (c* Config) Parse() error {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
-	}
+	
 	c.PG_HOST = os.Getenv("POSTGRES_HOST")
 	c.PG_DB   = os.Getenv("POSTGRES_DB")
 	c.PG_USER = os.Getenv("POSTGRES_USER")
@@ -49,7 +45,7 @@ func (c* Config) Parse() error {
 	}
 
 	if len(missingFields) > 0 {
-		panic("missing fields in config")
+		return errors.New("missing fields in config")
 	}
 
 	return nil

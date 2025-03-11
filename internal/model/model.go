@@ -6,7 +6,7 @@ import (
 
 type Schedule struct {
 	ID          int
-	UserID      string
+	UserID      int
 	CureName    string
 	DosesPerDay int
 	Duration    int

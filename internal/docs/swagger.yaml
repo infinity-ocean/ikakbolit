@@ -2,12 +2,7 @@ basePath: /
 definitions:
   controller.APIError:
     properties:
-      error:
-        type: string
-    type: object
-  controller.Response:
-    properties:
-      schedule_id:
+      message:
         type: string
     type: object
   controller.Schedule:
@@ -27,36 +22,11 @@ definitions:
           type: string
         type: array
       user_id:
-        type: string
+        type: integer
     type: object
-  controller.SchedulesInWindow:
+  controller.responseScheduleID:
     properties:
-      schedules:
-        items:
-          $ref: '#/definitions/controller.Schedule'
-        type: array
-    type: object
-  model.Schedule:
-    properties:
-      createdAt:
-        type: string
-      cureName:
-        type: string
-      dayFinish:
-        type: string
-      dayStart:
-        type: string
-      dosesPerDay:
-        type: integer
-      duration:
-        type: integer
-      id:
-        type: integer
-      intakes:
-        items:
-          type: string
-        type: array
-      userID:
+      schedule_id:
         type: string
     type: object
 host: localhost:8080
@@ -85,9 +55,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controller.SchedulesInWindow'
+            $ref: '#/definitions/controller.Schedule'
+        "204":
+          description: No content
         "400":
-          description: Bad Request
+          description: Bad request
+          schema:
+            $ref: '#/definitions/controller.APIError'
+        "404":
+          description: Resource not found
+          schema:
+            $ref: '#/definitions/controller.APIError'
+        "500":
+          description: Internal server error
           schema:
             $ref: '#/definitions/controller.APIError'
       summary: Get next scheduled takings
@@ -111,9 +91,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Schedule'
+            $ref: '#/definitions/controller.Schedule'
+        "204":
+          description: No content
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/controller.APIError'
         "404":
-          description: Not Found
+          description: Resource not found
+          schema:
+            $ref: '#/definitions/controller.APIError'
+        "500":
+          description: Internal server error
           schema:
             $ref: '#/definitions/controller.APIError'
       summary: Get a specific schedule
@@ -131,15 +121,24 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/controller.Response'
+            $ref: '#/definitions/controller.responseScheduleID'
         "400":
-          description: Bad Request
+          description: Bad request
           schema:
             $ref: '#/definitions/controller.APIError'
-      summary: Add a new schedule
+        "404":
+          description: Resource not found
+          schema:
+            $ref: '#/definitions/controller.APIError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/controller.APIError'
+      summary: Add a new schedule [! Предпочтительнее использовать http-клиент для
+        post-запросов, например Postman]
   /schedules:
     get:
       description: Retrieve schedule IDs for a given user
@@ -158,8 +157,18 @@ paths:
             items:
               type: integer
             type: array
+        "204":
+          description: No content
         "400":
-          description: Bad Request
+          description: Bad request
+          schema:
+            $ref: '#/definitions/controller.APIError'
+        "404":
+          description: Resource not found
+          schema:
+            $ref: '#/definitions/controller.APIError'
+        "500":
+          description: Internal server error
           schema:
             $ref: '#/definitions/controller.APIError'
       summary: Get user schedules

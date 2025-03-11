@@ -2,30 +2,33 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
-	"strings"
-)
 
-type APIError struct {
-	Err string `json:"error"`
-}
+	"github.com/infinity-ocean/ikakbolit/internal/model"
+)
 
 func httpWrapper(f func(w http.ResponseWriter, r *http.Request) error) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := f(w, r)
-		if err != nil {
-			errString := err.Error()
+		if err == nil {
+			return
+		}
+		switch {
+		case errors.Is(err, model.ErrNoContent):
+			writeJSONtoHTTP(w, http.StatusNoContent, APIError{Message: err.Error()})
+		case errors.Is(err, model.ErrBadRequest):
+			writeJSONtoHTTP(w, http.StatusBadRequest, APIError{Message: err.Error()})
+		case errors.Is(err, model.ErrNotFound):
+			writeJSONtoHTTP(w, http.StatusNotFound, APIError{Message: err.Error()})
+		case errors.Is(err, model.ErrMethodNotAllowed):
+			writeJSONtoHTTP(w, http.StatusMethodNotAllowed, APIError{Message: err.Error()})
+		case errors.Is(err, model.ErrInternalServerError):
+			writeJSONtoHTTP(w, http.StatusInternalServerError, APIError{Message: err.Error()})
+		default:
+			writeJSONtoHTTP(w, http.StatusInternalServerError, APIError{Message: err.Error()})
 
-			switch {
-			case errString == "no upcoming schedules found: all schedules are expired or user has no schedules":
-				w.WriteHeader(http.StatusNoContent)
-				return
-			case strings.HasPrefix(errString, "failed to insert schedule"):
-				writeJSONtoHTTP(w, http.StatusInternalServerError, APIError{Err: errString})
-			default:
-				writeJSONtoHTTP(w, http.StatusBadRequest, APIError{Err: errString})
-			}
 		}
 	}
 }

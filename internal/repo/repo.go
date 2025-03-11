@@ -22,7 +22,7 @@ func (r *repo) InsertSchedule(sched model.Schedule) (int, error) {
 	ctx := context.Background()
 	conn, err := r.pool.Acquire(ctx)
 	if err != nil {
-		return 0, fmt.Errorf("failed to acquire connection: %w", err)
+			return 0, fmt.Errorf("failed to accquire connection pool: %w", model.ErrInternalServerError)
 	}
 	defer conn.Release()
 
@@ -32,7 +32,7 @@ func (r *repo) InsertSchedule(sched model.Schedule) (int, error) {
 
 	err = conn.QueryRow(ctx, query, sched.UserID, sched.CureName, sched.DosesPerDay, sched.Duration).Scan(&id)
 	if err != nil {
-		return 0, fmt.Errorf("failed to insert schedule: %w", err)
+		return 0, fmt.Errorf("failed to insert schedule: %w", model.ErrInternalServerError)
 	}
 
 	return id, nil
@@ -41,7 +41,7 @@ func (r *repo) InsertSchedule(sched model.Schedule) (int, error) {
 func (r *repo) SelectSchedules(userID int) ([]model.Schedule, error) {
 	conn, err := r.pool.Acquire(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("failed to acquire connection: %w", err)
+		return nil, fmt.Errorf("failed to accquire connection pool: %w", model.ErrInternalServerError)
 	}
 	defer conn.Release()
 
@@ -52,7 +52,7 @@ func (r *repo) SelectSchedules(userID int) ([]model.Schedule, error) {
 	`
 	rows, err := conn.Query(context.Background(), sql, userID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to select schedules: %w", err)
+		return nil, fmt.Errorf("failed to select schedules: %w", model.ErrInternalServerError)
 	}
 	defer rows.Close()
 
@@ -62,7 +62,7 @@ func (r *repo) SelectSchedules(userID int) ([]model.Schedule, error) {
 		var duration int
 
 		if err := rows.Scan(&s.ID, &s.UserID, &s.CureName, &s.DosesPerDay, &duration, &s.CreatedAt); err != nil {
-			return nil, fmt.Errorf("failed to scan row: %w", err)
+			return nil, fmt.Errorf("failed to scan row: %w", model.ErrInternalServerError)
 		}
 
 		s.Duration = duration
@@ -70,7 +70,7 @@ func (r *repo) SelectSchedules(userID int) ([]model.Schedule, error) {
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows iteration error: %w", err)
+		return nil, fmt.Errorf("rows iteration error: %w", model.ErrInternalServerError)
 	}
 
 	return schedules, nil
@@ -79,7 +79,7 @@ func (r *repo) SelectSchedules(userID int) ([]model.Schedule, error) {
 func (r *repo) SelectSchedule(userID int, schedID int) (model.Schedule, error) {
 	conn, err := r.pool.Acquire(context.Background())
 	if err != nil {
-		return model.Schedule{}, fmt.Errorf("failed to acquire connection: %w", err)
+		return model.Schedule{}, fmt.Errorf("failed to accquire connection pool: %w", model.ErrInternalServerError)
 	}
 	defer conn.Release()
 
@@ -100,9 +100,9 @@ func (r *repo) SelectSchedule(userID int, schedID int) (model.Schedule, error) {
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return model.Schedule{}, fmt.Errorf("schedule not found for user_id=%d, schedID=%d: %w", userID, schedID, err)
+			return model.Schedule{}, nil
 		}
-		return model.Schedule{}, fmt.Errorf("failed to scan schedule: %w", err)
+		return model.Schedule{}, fmt.Errorf("failed to scan schedule: %w", model.ErrInternalServerError)
 	}
 	return schedule, nil
 }

@@ -39,11 +39,26 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controller.SchedulesInWindow"
+                            "$ref": "#/definitions/controller.Schedule"
                         }
                     },
+                    "204": {
+                        "description": "No content"
+                    },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/controller.APIError"
                         }
@@ -78,11 +93,26 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Schedule"
+                            "$ref": "#/definitions/controller.Schedule"
+                        }
+                    },
+                    "204": {
+                        "description": "No content"
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.APIError"
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "Resource not found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/controller.APIError"
                         }
@@ -97,7 +127,7 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Add a new schedule",
+                "summary": "Add a new schedule [! Предпочтительнее использовать http-клиент для post-запросов, например Postman]",
                 "parameters": [
                     {
                         "description": "Schedule data",
@@ -110,14 +140,26 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/controller.Response"
+                            "$ref": "#/definitions/controller.responseScheduleID"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/controller.APIError"
                         }
@@ -151,8 +193,23 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "204": {
+                        "description": "No content"
+                    },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.APIError"
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/controller.APIError"
                         }
@@ -165,15 +222,7 @@ const docTemplate = `{
         "controller.APIError": {
             "type": "object",
             "properties": {
-                "error": {
-                    "type": "string"
-                }
-            }
-        },
-        "controller.Response": {
-            "type": "object",
-            "properties": {
-                "schedule_id": {
+                "message": {
                     "type": "string"
                 }
             }
@@ -203,52 +252,14 @@ const docTemplate = `{
                     }
                 },
                 "user_id": {
-                    "type": "string"
+                    "type": "integer"
                 }
             }
         },
-        "controller.SchedulesInWindow": {
+        "controller.responseScheduleID": {
             "type": "object",
             "properties": {
-                "schedules": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/controller.Schedule"
-                    }
-                }
-            }
-        },
-        "model.Schedule": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "cureName": {
-                    "type": "string"
-                },
-                "dayFinish": {
-                    "type": "string"
-                },
-                "dayStart": {
-                    "type": "string"
-                },
-                "dosesPerDay": {
-                    "type": "integer"
-                },
-                "duration": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "intakes": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "userID": {
+                "schedule_id": {
                     "type": "string"
                 }
             }
