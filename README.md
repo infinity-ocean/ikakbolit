@@ -58,7 +58,12 @@ make start-infra
 make migration-up
 ```
 
-6️⃣ Запуск приложения
+6️⃣ Генерация OpenAPI-документации
+```sh
+swag init -g internal/cmd/main.go
+```
+
+7️⃣ Запуск приложения
 ```sh
 go run internal/cmd/main.go
 ```
@@ -111,12 +116,6 @@ Swagger-документация API: http://localhost:8080/swagger/index.html
     }
   ]
 }
-```
-
-📌 API Документация
-Генерация OpenAPI-документации:
-```sh
-swag init -g internal/cmd/main.go
 ```
 
 ## 🛠 Полезные команды (Makefile)
