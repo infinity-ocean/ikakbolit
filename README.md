@@ -88,7 +88,7 @@ Swagger-документация API: http://localhost:8080/swagger/index.html
   "user_id": 1,
   "cure_name": "Arbidol",
   "doses_per_day": 7,
-  "duration_days": 5
+  "duration_days": 5 // допускается 0, обозначает постонный приём препарата
 }
 ```
 Поле ```"duration_days"``` отображает длительность приёма, указывается в днях, ```"doses_per_day"``` количество ежедневных приёмов.
@@ -142,7 +142,7 @@ Swagger-документация API: http://localhost:8080/swagger/index.html
 }
 ```
 
-### Генерация OpenAPI-документации происходит из пакета **internal** 
+### Генерация OpenAPI-документации. Происходит из пакета **internal**
 ```sh
 cd internal
 swag init -g cmd/main.go
