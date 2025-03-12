@@ -98,11 +98,13 @@ func (r *repo) SelectSchedule(userID int, schedID int) (model.Schedule, error) {
 		&schedule.DurationDays,
 		&schedule.CreatedAt,
 	)
+
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return model.Schedule{}, nil
 		}
 		return model.Schedule{}, fmt.Errorf("failed to scan schedule: %w", model.ErrInternalServerError)
 	}
+
 	return schedule, nil
 }

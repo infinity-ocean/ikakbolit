@@ -105,7 +105,22 @@ Swagger-документация API: http://localhost:8080/swagger/index.html
   "schedules": [1, 2, 3]
 }
 ```
-- **3️⃣ GET /schedule?user_id=&schedule_id=**: Получает расписание приема лекарства по ID пользователя и ID расписания. Требует параметры user_id и schedule_id в query.
+- **3️⃣ GET /schedule?user_id=&schedule_id=**: Получает расписание приема лекарства по ID пользователя и ID расписания. Требует параметры user_id и schedule_id в query. Пример ответа:
+```json
+{
+    "ID": 4,
+    "UserID": 4,
+    "CureName": "Amoxicillin",
+    "DosesPerDay": 3,
+    "DurationDays": 12,
+    "CreatedAt": "2025-03-12T17:48:42.645442Z",
+    "Intakes": [
+        "08:00",
+        "14:52",
+        "21:45"
+    ]
+}
+```
 - **4️⃣ GET /next_takings?user_id**: Возвращает список ближайших приемов лекарств для пользователя в период, определяемый в конфигурации переменной ```"CURE_SCHEDULE_WINDOW_MIN"```. Требует параметр user_id в query.
 Пример ответа:
 ```json

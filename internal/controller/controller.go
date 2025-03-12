@@ -41,7 +41,7 @@ func (c *controller) Run() error {
 	)).Methods(http.MethodGet)
 	router.Handle("/swagger/", http.StripPrefix("/swagger/", swagger.WrapHandler))
 	router.HandleFunc("/schedule", httpWrapper(c.addSchedule)).Methods("POST")
-	router.HandleFunc("/schedules", httpWrapper(c.getSchedules)).Methods("GET")
+	router.HandleFunc("/schedules", httpWrapper(c.getScheduleIDs)).Methods("GET")
 	router.HandleFunc("/schedule", httpWrapper(c.getSchedule)).Methods("GET")
 	router.HandleFunc("/next_takings", httpWrapper(c.getNextTakings)).Methods("GET")
 
@@ -85,7 +85,7 @@ func (c *controller) addSchedule(w http.ResponseWriter, r *http.Request) error {
 // @Failure 404 {object} APIError "Resource not found"
 // @Failure 500 {object} APIError "Internal server error"
 // @Router /schedules [get]
-func (c *controller) getSchedules(w http.ResponseWriter, r *http.Request) error {
+func (c *controller) getScheduleIDs(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
 		return writeJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect user_id: %w", err))
@@ -133,10 +133,10 @@ func (c *controller) getSchedule(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if response.ID == 0 {
-		return writeJSONtoHTTP(w, http.StatusNoContent, response)
+		return writeJSONtoHTTP(w, http.StatusNoContent, Schedule(response))
 	}
 
-	return writeJSONtoHTTP(w, http.StatusOK, response)
+	return writeJSONtoHTTP(w, http.StatusOK, Schedule(response))
 }
 
 // @Summary Get next scheduled takings
