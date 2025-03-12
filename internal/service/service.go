@@ -80,6 +80,11 @@ func (s *service) GetNextTakings(userID int) ([]model.Schedule, error) {
 	var result []model.Schedule
 
 	for _, schedule := range schedules {
+		scheduleEnd := schedule.CreatedAt.Add(time.Duration(schedule.DurationDays) * 24 * time.Hour)
+		if now.After(scheduleEnd) {
+			continue
+		}
+
 		times, err := CalculateIntakeTimes(schedule.DosesPerDay)
 		if err != nil {
 			return nil, fmt.Errorf("incorrect .env DAY_START or DAY_FINISH: %w", model.ErrInternalServerError)

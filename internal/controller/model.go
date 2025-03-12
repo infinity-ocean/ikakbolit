@@ -13,27 +13,27 @@ type responseScheduleID struct {
 
 // swagger:model Schedule
 type Schedule struct {
-	ID          int
-	UserID      int           `json:"user_id"`
-	CureName    string        `json:"cure_name"`
-	DosesPerDay int           `json:"doses_per_day"`
-	Duration    int           `json:"duration"`
-	CreatedAt   time.Time     `json:"created_at"`
+	ID           int
+	UserID       int       `json:"user_id"`
+	CureName     string    `json:"cure_name"`
+	DosesPerDay  int       `json:"doses_per_day"`
+	DurationDays int       `json:"duration_days"`
+	CreatedAt    time.Time `json:"created_at"`
 
-	DayStart    time.Time     `json:"-"`
-	DayFinish   time.Time     `json:"-"`
+	DayStart     time.Time `json:"-"`
+	DayFinish    time.Time `json:"-"`
 	
-	Intakes     []string      `json:"intakes"`
+	Intakes      []string  `json:"intakes"`
 }
 
 func toModelSchedule(s Schedule) model.Schedule {
 	return model.Schedule{
-		ID:          s.ID,
-		UserID:      s.UserID,
-		CureName:    s.CureName,
-		DosesPerDay: s.DosesPerDay,
-		Duration:    s.Duration,
-		CreatedAt:   s.CreatedAt,
+		ID:           s.ID,
+		UserID:       s.UserID,
+		CureName:     s.CureName,
+		DosesPerDay:  s.DosesPerDay,
+		DurationDays: s.DurationDays,
+		CreatedAt:    s.CreatedAt,
 	}
 }
 
@@ -44,5 +44,5 @@ type SchedulesInWindow struct {
 
 // swagger:model APIError
 type APIError struct {
-    Message string `json:"message"`
+	Message string `json:"message"`
 }

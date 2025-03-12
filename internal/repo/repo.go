@@ -27,10 +27,10 @@ func (r *repo) InsertSchedule(sched model.Schedule) (int, error) {
 	defer conn.Release()
 
 	var id int
-	query := `INSERT INTO scheduled (user_id, cure_name, doses_per_day, duration) 
+	query := `INSERT INTO scheduled (user_id, cure_name, doses_per_day, duration_days) 
 			  VALUES ($1, $2, $3, $4) RETURNING id;`
 
-	err = conn.QueryRow(ctx, query, sched.UserID, sched.CureName, sched.DosesPerDay, sched.Duration).Scan(&id)
+	err = conn.QueryRow(ctx, query, sched.UserID, sched.CureName, sched.DosesPerDay, sched.DurationDays).Scan(&id)
 	if err != nil {
 		return 0, fmt.Errorf("failed to insert schedule: %w", model.ErrInternalServerError)
 	}
@@ -46,7 +46,7 @@ func (r *repo) SelectSchedules(userID int) ([]model.Schedule, error) {
 	defer conn.Release()
 
 	sql := `
-		SELECT id, user_id, cure_name, doses_per_day, duration, created_at 
+		SELECT id, user_id, cure_name, doses_per_day, duration_days, created_at 
 		FROM scheduled 
 		WHERE user_id = $1
 	`
@@ -65,7 +65,7 @@ func (r *repo) SelectSchedules(userID int) ([]model.Schedule, error) {
 			return nil, fmt.Errorf("failed to scan row: %w", model.ErrInternalServerError)
 		}
 
-		s.Duration = duration
+		s.DurationDays = duration
 		schedules = append(schedules, s)
 	}
 
@@ -83,7 +83,7 @@ func (r *repo) SelectSchedule(userID int, schedID int) (model.Schedule, error) {
 	}
 	defer conn.Release()
 
-	sql := `SELECT id, user_id, cure_name, doses_per_day, duration, created_at 
+	sql := `SELECT id, user_id, cure_name, doses_per_day, duration_days, created_at 
 			FROM scheduled 
 			WHERE user_id = $1 AND id = $2`
 
@@ -95,7 +95,7 @@ func (r *repo) SelectSchedule(userID int, schedID int) (model.Schedule, error) {
 		&schedule.UserID,
 		&schedule.CureName,
 		&schedule.DosesPerDay,
-		&schedule.Duration,
+		&schedule.DurationDays,
 		&schedule.CreatedAt,
 	)
 	if err != nil {
