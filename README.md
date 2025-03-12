@@ -115,7 +115,7 @@ Swagger-документация API: http://localhost:8080/swagger/index.html
       "ID": 8,
       "user_id": "8",
       "cure_name": "Atorvastatin",
-      "doses_per_day": 24,
+      "doses_per_day": 2,
       "duration_days": 3,
       "created_at": "2025-03-07T23:46:58.292596Z",
       "intakes": [
