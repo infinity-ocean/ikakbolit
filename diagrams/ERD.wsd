@@ -1,5 +1,7 @@
 @startuml ikakbolit
 
+' В процессе разработки использовал расширение PlantUML для VS Code
+
 entity "User" as users {
     id : Integer <<PK>>
     name : String <<Not Null>>
