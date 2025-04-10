@@ -2,12 +2,12 @@
 
 ' В процессе разработки использовал расширение PlantUML для VS Code
 
-entity "User" as users {
+entity users {
     id : Integer <<PK>>
     name : String <<Not Null>>
 }
 
-entity "ScheduledTreatment" as scheduled {
+entity schedules {
     id : Integer <<PK>>
     user_id : Integer <<FK>> <<Not Null>>
     cure_name : String <<Not Null>>
@@ -16,6 +16,8 @@ entity "ScheduledTreatment" as scheduled {
     created_at : DateTime <<Not Null>>
 }
 
-users ||--o{ scheduled : "0..*"
+' || - значит 1 юзер должен существовать
+' o{ - значит расписаний у одного юзера может быть от 0 до *
+users ||--o{ schedules : "0..*"
 
 @enduml
