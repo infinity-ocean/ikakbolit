@@ -1,0 +1,128 @@
+@startuml ikakbolit
+
+' В процессе разработки использовалось расширение PlantUML для VS Code
+' +Публичные поля; -Непубличные поля
+' ..> Зависимость; ..|> Имлпементация интерфейса 
+
+package "model" {
+    class "model.Schedule" <<struct>> {
+        +ID: int
+        +UserID: int
+        +CureName: string
+        +DosesPerDay: int
+        +DurationDays: int
+        +CreatedAt: date
+        +DayStart: date
+        +DayFinish: date
+        +Intakes: []string
+    }
+}
+
+package "controller" {
+    class "controller.controller" <<struct>> {
+        -service: Service
+        -listenPort: string
+        +New(service, string): *controller
+        +Run(): error
+
+        -addSchedule(http.ResponseWriter, *http.Request): error
+        -getScheduleIDs(http.ResponseWriter, *http.Request) error
+        -getSchedule(http.ResponseWriter, *http.Request) error
+        -getNextTakings(http.ResponseWriter, *http.Request) error
+
+        -httpWrapper(func(http.ResponseWriter, *http.Request) error): func(http.ResponseWriter, *http.Request)
+        -writeJSONtoHTTP(http.ResponseWriter, int, any): error
+    }
+    
+    interface "controller.service" <<interface>> {
+        +AddSchedule(model.Schedule): (int, error)
+        +GetScheduleIDs(int): ([]int, error)
+        +GetScheduleWithIntake(int, int): (model.Schedule, error)
+        +GetNextTakings(int): ([]model.Schedule, error)
+    }
+
+    class "controller.Schedule" <<struct>> {
+        +ID: int
+        +UserID: int 
+        +CureName: string 
+        +DosesPerDay: int 
+        +DurationDays: int
+        +CreatedAt: date
+        +Intakes: []string 
+        -toModelSchedule(controller.Schedule): model.Schedule
+    }
+    
+    class "controller.APIError" <<struct>> {
+        +Message: string 
+    }
+
+
+}
+
+package "repo" {
+    class "repo.repo" <<struct>> {
+        -pool: *pgxpool.Pool
+        +New(*pgxpool.Pool): *repo
+        +MakePool(config config.Config) (*pgxpool.Pool, error)
+
+        +InsertSchedule(sched model.Schedule): (int, error)
+        +SelectSchedules(userID int): ([]model.Schedule, error)
+        +SelectSchedule(userID int, schedID int): (model.Schedule, error)
+    }
+
+    class "repo.Schedule" <<struct>> {
+        +ID: int 
+        +UserID: int
+        +CureName: string 
+        +DosesPerDay: int 
+        +DurationDays: int
+        +CreatedAt: date
+    }
+
+}
+
+package service {
+    class "service.service" <<struct>> {
+        +repo: service.repo
+        +AddSchedule(schedule model.Schedule): (int, error)
+        +GetScheduleIDs(userID int): ([]int, error)
+        +GetScheduleWithIntake(userID int, scheduleID int): (model.Schedule, error)
+        +GetNextTakings(userID int): ([]model.Schedule, error)
+        +CalculateIntakeTimes(dosesPerDay int): ([]string, error)
+    }
+
+    interface "service.repo" <<interface>> {
+        +InsertSchedule(model.Schedule): (int, error)
+        +SelectSchedules(int): ([]model.Schedule, error)
+        +SelectSchedule(int, int): (model.Schedule, error)
+    }
+}
+
+
+' Конфигурация
+class "config.Config" <<struct>> {
+    +PG_HOST: string
+    +PG_DB: string
+    +PG_USER: string
+    +PG_PASSWORD: string
+    +PG_PORT: string
+    +PG_SSL: string
+    +Parse(): error
+}
+
+' Зависимости
+"controller.controller" ..> "1..*" "controller.Schedule" 
+"controller.controller" ..> "controller.service" 
+"controller.controller" ..> "controller.APIError" 
+"controller.service" ..> "model.Schedule" 
+
+"controller.Schedule" ..> "1..1" "model.Schedule" 
+
+"service.service" ..|> "controller.service": implements
+"service.service" ..> "service.repo" 
+
+"repo.repo" ..|> "service.repo": implements
+"repo.repo" ..> "config.Config": creates
+"repo.Schedule" ..> "model.Schedule"
+
+@enduml

@@ -1,0 +1,19 @@
+@startuml ikakbolit
+
+entity "User" as users {
+    id : Integer <<PK>>
+    name : String <<Not Null>>
+}
+
+entity "ScheduledTreatment" as scheduled {
+    id : Integer <<PK>>
+    user_id : Integer <<FK>> <<Not Null>>
+    cure_name : String <<Not Null>>
+    doses_per_day : Integer <<Not Null>>
+    duration_days : Integer <<Not Null>>
+    created_at : DateTime <<Not Null>>
+}
+
+users ||--o{ scheduled : "0..*"
+
+@enduml
