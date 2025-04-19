@@ -88,7 +88,7 @@ Swagger-документация API: http://localhost:8080/swagger/index.html
   "user_id": 1,
   "cure_name": "Arbidol",
   "doses_per_day": 7,
-  "duration_days": 5 // допускается 0, обозначает постонный приём препарата
+  "duration_days": 5 // допускается 0, обозначает постоянный приём препарата
 }
 ```
 Поле ```"duration_days"``` отображает длительность приёма, указывается в днях, ```"doses_per_day"``` количество ежедневных приёмов.

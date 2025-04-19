@@ -1,5 +1,9 @@
 -- +goose Up
 -- +goose StatementBegin
+-- Add extenstions
+CREATE EXTENSION IF NOT EXISTS "pgcrypto"; 
+CREATE EXTENSION IF NOT EXISTS postgis;
+
 -- Create users table
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,

@@ -3,7 +3,7 @@ volumes:
 
 services:
   postgres:
-    image: postgres:latest
+    image: postgis/postgis:16-3.4
     ports:
       - ${POSTGRES_PORT}:5432
     environment:
