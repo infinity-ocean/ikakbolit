@@ -149,3 +149,10 @@ Seq Scan on developers  (cost=0.00..23.00 rows=494 width=76)
 
 Также пробовал альтернативные по типу CREATE INDEX idx_developers_is_available_true ON developers (is_available) WHERE is_available = TRUE;
 Результат такой же негативный.
+
+Тестируем b-tree индекс на поле name
+Запрос - SELECT * FROM DEVELOPERS для 10 000 записей: 
+Seq Scan on developers  (cost=0.00..230.20 rows=10020 width=76)
+
+Запрос - SELECT * FROM DEVELOPERS для 100 000 записей: 
+Seq Scan on developers  (cost=0.00..2296.69 rows=99969 width=76)
