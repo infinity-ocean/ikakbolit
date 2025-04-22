@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/infinity-ocean/ikakbolit/internal/model"
 
-	_ "github.com/infinity-ocean/ikakbolit/internal/docs"
+	_ "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/docs"
 	swagger "github.com/swaggo/http-swagger"
 )
 
@@ -162,7 +162,7 @@ func (c *controller) getNextTakings(w http.ResponseWriter, r *http.Request) erro
 
 	schedules := make([]Schedule, 0, len(schedulesRaw))
 	for _, s := range schedulesRaw {
-		schedules = append(schedules, Schedule(s))
+ 		schedules = append(schedules, Schedule(s))
 	}
 
 	if len(schedules) == 0 {

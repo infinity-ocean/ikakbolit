@@ -1,6 +1,10 @@
 package main
 
 import (
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
 	"log"
 
 	"github.com/infinity-ocean/ikakbolit/internal/config"
@@ -43,7 +47,23 @@ func main() {
 	svc := service.New(repo)
 	ctrl := controller.New(svc, ":8080")
 
-	if err := ctrl.Run(); err != nil {
-		log.Println(err)
-	}
+	grpcSrv := controller.NewGrpcServer(svc)
+
+	go func() {
+		if err := controller.StartGrpcServer(grpcSrv, "50051"); err != nil {
+			log.Fatalf("failed to start gRPC server: %v", err)
+		}
+	}()
+
+	go func() {
+		if err := ctrl.Run(); err != nil {
+			log.Fatalf("failed to start REST server: %v", err)
+		}
+	}()
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	<-ctx.Done()
+	log.Println("Shutting down servers...")
 }

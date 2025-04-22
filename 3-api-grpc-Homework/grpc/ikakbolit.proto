@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package ikakbolit;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/grpc/ikakbolit";
+
+message Schedule {
+  int64 id = 1;
+  int64 user_id = 2;
+  string cure_name = 3;
+  int64 doses_per_day = 4;
+  int64 duration_days = 5;
+  google.protobuf.Timestamp created_at = 6;
+
+  google.protobuf.Timestamp day_start = 7;
+  google.protobuf.Timestamp day_finish = 8;
+
+  repeated string intakes = 9;
+}
+
+message ResponseScheduleID {
+  int64 schedule_id = 1;
+}
+
+message ScheduleIDsResponse {
+  repeated int64 ids = 1;
+}
+
+message SchedulesInWindow {
+  repeated Schedule schedules = 1;
+}
+
+message UserIDRequest {
+  int64 user_id = 1;
+}
+
+message ScheduleRequest {
+  int64 user_id = 1;
+  int64 schedule_id = 2;
+}
+ 
+service IkakbolitService {
+  rpc AddSchedule(Schedule) returns (ResponseScheduleID);
+  rpc GetScheduleIDs(UserIDRequest) returns (ScheduleIDsResponse);
+  rpc GetSchedule(ScheduleRequest) returns (Schedule);
+  rpc GetNextTakings(UserIDRequest) returns (SchedulesInWindow);
+}
