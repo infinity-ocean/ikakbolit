@@ -22,35 +22,30 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Schedule struct {
+type RequestSchedule struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	CureName      string                 `protobuf:"bytes,3,opt,name=cure_name,json=cureName,proto3" json:"cure_name,omitempty"`
-	DosesPerDay   int64                  `protobuf:"varint,4,opt,name=doses_per_day,json=dosesPerDay,proto3" json:"doses_per_day,omitempty"`
-	DurationDays  int64                  `protobuf:"varint,5,opt,name=duration_days,json=durationDays,proto3" json:"duration_days,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	DayStart      *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=day_start,json=dayStart,proto3" json:"day_start,omitempty"`
-	DayFinish     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=day_finish,json=dayFinish,proto3" json:"day_finish,omitempty"`
-	Intakes       []string               `protobuf:"bytes,9,rep,name=intakes,proto3" json:"intakes,omitempty"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	CureName      string                 `protobuf:"bytes,2,opt,name=cure_name,json=cureName,proto3" json:"cure_name,omitempty"`
+	DosesPerDay   int64                  `protobuf:"varint,3,opt,name=doses_per_day,json=dosesPerDay,proto3" json:"doses_per_day,omitempty"`
+	DurationDays  int64                  `protobuf:"varint,4,opt,name=duration_days,json=durationDays,proto3" json:"duration_days,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Schedule) Reset() {
-	*x = Schedule{}
+func (x *RequestSchedule) Reset() {
+	*x = RequestSchedule{}
 	mi := &file_ikakbolit_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Schedule) String() string {
+func (x *RequestSchedule) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Schedule) ProtoMessage() {}
+func (*RequestSchedule) ProtoMessage() {}
 
-func (x *Schedule) ProtoReflect() protoreflect.Message {
+func (x *RequestSchedule) ProtoReflect() protoreflect.Message {
 	mi := &file_ikakbolit_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -62,72 +57,37 @@ func (x *Schedule) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Schedule.ProtoReflect.Descriptor instead.
-func (*Schedule) Descriptor() ([]byte, []int) {
+// Deprecated: Use RequestSchedule.ProtoReflect.Descriptor instead.
+func (*RequestSchedule) Descriptor() ([]byte, []int) {
 	return file_ikakbolit_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Schedule) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *Schedule) GetUserId() int64 {
+func (x *RequestSchedule) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
 	return 0
 }
 
-func (x *Schedule) GetCureName() string {
+func (x *RequestSchedule) GetCureName() string {
 	if x != nil {
 		return x.CureName
 	}
 	return ""
 }
 
-func (x *Schedule) GetDosesPerDay() int64 {
+func (x *RequestSchedule) GetDosesPerDay() int64 {
 	if x != nil {
 		return x.DosesPerDay
 	}
 	return 0
 }
 
-func (x *Schedule) GetDurationDays() int64 {
+func (x *RequestSchedule) GetDurationDays() int64 {
 	if x != nil {
 		return x.DurationDays
 	}
 	return 0
-}
-
-func (x *Schedule) GetCreatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return nil
-}
-
-func (x *Schedule) GetDayStart() *timestamppb.Timestamp {
-	if x != nil {
-		return x.DayStart
-	}
-	return nil
-}
-
-func (x *Schedule) GetDayFinish() *timestamppb.Timestamp {
-	if x != nil {
-		return x.DayFinish
-	}
-	return nil
-}
-
-func (x *Schedule) GetIntakes() []string {
-	if x != nil {
-		return x.Intakes
-	}
-	return nil
 }
 
 type ResponseScheduleID struct {
@@ -174,116 +134,28 @@ func (x *ResponseScheduleID) GetScheduleId() int64 {
 	return 0
 }
 
-type ScheduleIDsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Ids           []int64                `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ScheduleIDsResponse) Reset() {
-	*x = ScheduleIDsResponse{}
-	mi := &file_ikakbolit_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ScheduleIDsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ScheduleIDsResponse) ProtoMessage() {}
-
-func (x *ScheduleIDsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ikakbolit_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ScheduleIDsResponse.ProtoReflect.Descriptor instead.
-func (*ScheduleIDsResponse) Descriptor() ([]byte, []int) {
-	return file_ikakbolit_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *ScheduleIDsResponse) GetIds() []int64 {
-	if x != nil {
-		return x.Ids
-	}
-	return nil
-}
-
-type SchedulesInWindow struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Schedules     []*Schedule            `protobuf:"bytes,1,rep,name=schedules,proto3" json:"schedules,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SchedulesInWindow) Reset() {
-	*x = SchedulesInWindow{}
-	mi := &file_ikakbolit_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SchedulesInWindow) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SchedulesInWindow) ProtoMessage() {}
-
-func (x *SchedulesInWindow) ProtoReflect() protoreflect.Message {
-	mi := &file_ikakbolit_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SchedulesInWindow.ProtoReflect.Descriptor instead.
-func (*SchedulesInWindow) Descriptor() ([]byte, []int) {
-	return file_ikakbolit_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *SchedulesInWindow) GetSchedules() []*Schedule {
-	if x != nil {
-		return x.Schedules
-	}
-	return nil
-}
-
-type UserIDRequest struct {
+type RequestUserID struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UserIDRequest) Reset() {
-	*x = UserIDRequest{}
-	mi := &file_ikakbolit_proto_msgTypes[4]
+func (x *RequestUserID) Reset() {
+	*x = RequestUserID{}
+	mi := &file_ikakbolit_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UserIDRequest) String() string {
+func (x *RequestUserID) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UserIDRequest) ProtoMessage() {}
+func (*RequestUserID) ProtoMessage() {}
 
-func (x *UserIDRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ikakbolit_proto_msgTypes[4]
+func (x *RequestUserID) ProtoReflect() protoreflect.Message {
+	mi := &file_ikakbolit_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -294,19 +166,63 @@ func (x *UserIDRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UserIDRequest.ProtoReflect.Descriptor instead.
-func (*UserIDRequest) Descriptor() ([]byte, []int) {
-	return file_ikakbolit_proto_rawDescGZIP(), []int{4}
+// Deprecated: Use RequestUserID.ProtoReflect.Descriptor instead.
+func (*RequestUserID) Descriptor() ([]byte, []int) {
+	return file_ikakbolit_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *UserIDRequest) GetUserId() int64 {
+func (x *RequestUserID) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
 	return 0
 }
 
-type ScheduleRequest struct {
+type ResponseScheduleIDs struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SchdeduleIds  []int64                `protobuf:"varint,1,rep,packed,name=schdedule_ids,json=schdeduleIds,proto3" json:"schdedule_ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResponseScheduleIDs) Reset() {
+	*x = ResponseScheduleIDs{}
+	mi := &file_ikakbolit_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResponseScheduleIDs) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResponseScheduleIDs) ProtoMessage() {}
+
+func (x *ResponseScheduleIDs) ProtoReflect() protoreflect.Message {
+	mi := &file_ikakbolit_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResponseScheduleIDs.ProtoReflect.Descriptor instead.
+func (*ResponseScheduleIDs) Descriptor() ([]byte, []int) {
+	return file_ikakbolit_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ResponseScheduleIDs) GetSchdeduleIds() []int64 {
+	if x != nil {
+		return x.SchdeduleIds
+	}
+	return nil
+}
+
+type RequestUserIDScheduleID struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	ScheduleId    int64                  `protobuf:"varint,2,opt,name=schedule_id,json=scheduleId,proto3" json:"schedule_id,omitempty"`
@@ -314,20 +230,77 @@ type ScheduleRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ScheduleRequest) Reset() {
-	*x = ScheduleRequest{}
+func (x *RequestUserIDScheduleID) Reset() {
+	*x = RequestUserIDScheduleID{}
+	mi := &file_ikakbolit_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestUserIDScheduleID) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestUserIDScheduleID) ProtoMessage() {}
+
+func (x *RequestUserIDScheduleID) ProtoReflect() protoreflect.Message {
+	mi := &file_ikakbolit_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestUserIDScheduleID.ProtoReflect.Descriptor instead.
+func (*RequestUserIDScheduleID) Descriptor() ([]byte, []int) {
+	return file_ikakbolit_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *RequestUserIDScheduleID) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *RequestUserIDScheduleID) GetScheduleId() int64 {
+	if x != nil {
+		return x.ScheduleId
+	}
+	return 0
+}
+
+type ResponseSchedule struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	CureName      string                 `protobuf:"bytes,3,opt,name=cure_name,json=cureName,proto3" json:"cure_name,omitempty"`
+	DosesPerDay   int64                  `protobuf:"varint,4,opt,name=doses_per_day,json=dosesPerDay,proto3" json:"doses_per_day,omitempty"`
+	DurationDays  int64                  `protobuf:"varint,5,opt,name=duration_days,json=durationDays,proto3" json:"duration_days,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Intakes       []string               `protobuf:"bytes,7,rep,name=intakes,proto3" json:"intakes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResponseSchedule) Reset() {
+	*x = ResponseSchedule{}
 	mi := &file_ikakbolit_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ScheduleRequest) String() string {
+func (x *ResponseSchedule) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ScheduleRequest) ProtoMessage() {}
+func (*ResponseSchedule) ProtoMessage() {}
 
-func (x *ScheduleRequest) ProtoReflect() protoreflect.Message {
+func (x *ResponseSchedule) ProtoReflect() protoreflect.Message {
 	mi := &file_ikakbolit_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -339,60 +312,187 @@ func (x *ScheduleRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ScheduleRequest.ProtoReflect.Descriptor instead.
-func (*ScheduleRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ResponseSchedule.ProtoReflect.Descriptor instead.
+func (*ResponseSchedule) Descriptor() ([]byte, []int) {
 	return file_ikakbolit_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *ScheduleRequest) GetUserId() int64 {
+func (x *ResponseSchedule) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ResponseSchedule) GetUserId() int64 {
 	if x != nil {
 		return x.UserId
 	}
 	return 0
 }
 
-func (x *ScheduleRequest) GetScheduleId() int64 {
+func (x *ResponseSchedule) GetCureName() string {
 	if x != nil {
-		return x.ScheduleId
+		return x.CureName
+	}
+	return ""
+}
+
+func (x *ResponseSchedule) GetDosesPerDay() int64 {
+	if x != nil {
+		return x.DosesPerDay
 	}
 	return 0
+}
+
+func (x *ResponseSchedule) GetDurationDays() int64 {
+	if x != nil {
+		return x.DurationDays
+	}
+	return 0
+}
+
+func (x *ResponseSchedule) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *ResponseSchedule) GetIntakes() []string {
+	if x != nil {
+		return x.Intakes
+	}
+	return nil
+}
+
+type RequestNextTakings struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RequestNextTakings) Reset() {
+	*x = RequestNextTakings{}
+	mi := &file_ikakbolit_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestNextTakings) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestNextTakings) ProtoMessage() {}
+
+func (x *RequestNextTakings) ProtoReflect() protoreflect.Message {
+	mi := &file_ikakbolit_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestNextTakings.ProtoReflect.Descriptor instead.
+func (*RequestNextTakings) Descriptor() ([]byte, []int) {
+	return file_ikakbolit_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *RequestNextTakings) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type ResponseNextTakings struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Schedules     []*ResponseSchedule    `protobuf:"bytes,1,rep,name=schedules,proto3" json:"schedules,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResponseNextTakings) Reset() {
+	*x = ResponseNextTakings{}
+	mi := &file_ikakbolit_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResponseNextTakings) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResponseNextTakings) ProtoMessage() {}
+
+func (x *ResponseNextTakings) ProtoReflect() protoreflect.Message {
+	mi := &file_ikakbolit_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResponseNextTakings.ProtoReflect.Descriptor instead.
+func (*ResponseNextTakings) Descriptor() ([]byte, []int) {
+	return file_ikakbolit_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ResponseNextTakings) GetSchedules() []*ResponseSchedule {
+	if x != nil {
+		return x.Schedules
+	}
+	return nil
 }
 
 var File_ikakbolit_proto protoreflect.FileDescriptor
 
 const file_ikakbolit_proto_rawDesc = "" +
 	"\n" +
-	"\x0fikakbolit.proto\x12\tikakbolit\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe2\x02\n" +
-	"\bSchedule\x12\x0e\n" +
+	"\x0fikakbolit.proto\x12\tikakbolit\x1a\x1fgoogle/protobuf/timestamp.proto\"\x90\x01\n" +
+	"\x0fRequestSchedule\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
+	"\tcure_name\x18\x02 \x01(\tR\bcureName\x12\"\n" +
+	"\rdoses_per_day\x18\x03 \x01(\x03R\vdosesPerDay\x12#\n" +
+	"\rduration_days\x18\x04 \x01(\x03R\fdurationDays\"5\n" +
+	"\x12ResponseScheduleID\x12\x1f\n" +
+	"\vschedule_id\x18\x01 \x01(\x03R\n" +
+	"scheduleId\"(\n" +
+	"\rRequestUserID\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\":\n" +
+	"\x13ResponseScheduleIDs\x12#\n" +
+	"\rschdedule_ids\x18\x01 \x03(\x03R\fschdeduleIds\"S\n" +
+	"\x17RequestUserIDScheduleID\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1f\n" +
+	"\vschedule_id\x18\x02 \x01(\x03R\n" +
+	"scheduleId\"\xf6\x01\n" +
+	"\x10ResponseSchedule\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1b\n" +
 	"\tcure_name\x18\x03 \x01(\tR\bcureName\x12\"\n" +
 	"\rdoses_per_day\x18\x04 \x01(\x03R\vdosesPerDay\x12#\n" +
 	"\rduration_days\x18\x05 \x01(\x03R\fdurationDays\x129\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x127\n" +
-	"\tday_start\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\bdayStart\x129\n" +
-	"\n" +
-	"day_finish\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tdayFinish\x12\x18\n" +
-	"\aintakes\x18\t \x03(\tR\aintakes\"5\n" +
-	"\x12ResponseScheduleID\x12\x1f\n" +
-	"\vschedule_id\x18\x01 \x01(\x03R\n" +
-	"scheduleId\"'\n" +
-	"\x13ScheduleIDsResponse\x12\x10\n" +
-	"\x03ids\x18\x01 \x03(\x03R\x03ids\"F\n" +
-	"\x11SchedulesInWindow\x121\n" +
-	"\tschedules\x18\x01 \x03(\v2\x13.ikakbolit.ScheduleR\tschedules\"(\n" +
-	"\rUserIDRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\"K\n" +
-	"\x0fScheduleRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1f\n" +
-	"\vschedule_id\x18\x02 \x01(\x03R\n" +
-	"scheduleId2\xab\x02\n" +
-	"\x10IkakbolitService\x12A\n" +
-	"\vAddSchedule\x12\x13.ikakbolit.Schedule\x1a\x1d.ikakbolit.ResponseScheduleID\x12J\n" +
-	"\x0eGetScheduleIDs\x12\x18.ikakbolit.UserIDRequest\x1a\x1e.ikakbolit.ScheduleIDsResponse\x12>\n" +
-	"\vGetSchedule\x12\x1a.ikakbolit.ScheduleRequest\x1a\x13.ikakbolit.Schedule\x12H\n" +
-	"\x0eGetNextTakings\x12\x18.ikakbolit.UserIDRequest\x1a\x1c.ikakbolit.SchedulesInWindowBHZFgithub.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/grpc/ikakbolitb\x06proto3"
+	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x18\n" +
+	"\aintakes\x18\a \x03(\tR\aintakes\"-\n" +
+	"\x12RequestNextTakings\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\"P\n" +
+	"\x13ResponseNextTakings\x129\n" +
+	"\tschedules\x18\x01 \x03(\v2\x1b.ikakbolit.ResponseScheduleR\tschedules2\xc9\x02\n" +
+	"\x10IkakbolitService\x12H\n" +
+	"\vAddSchedule\x12\x1a.ikakbolit.RequestSchedule\x1a\x1d.ikakbolit.ResponseScheduleID\x12J\n" +
+	"\x0eGetScheduleIDs\x12\x18.ikakbolit.RequestUserID\x1a\x1e.ikakbolit.ResponseScheduleIDs\x12N\n" +
+	"\vGetSchedule\x12\".ikakbolit.RequestUserIDScheduleID\x1a\x1b.ikakbolit.ResponseSchedule\x12O\n" +
+	"\x0eGetNextTakings\x12\x1d.ikakbolit.RequestNextTakings\x1a\x1e.ikakbolit.ResponseNextTakingsBHZFgithub.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/grpc/ikakbolitb\x06proto3"
 
 var (
 	file_ikakbolit_proto_rawDescOnce sync.Once
@@ -406,34 +506,34 @@ func file_ikakbolit_proto_rawDescGZIP() []byte {
 	return file_ikakbolit_proto_rawDescData
 }
 
-var file_ikakbolit_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_ikakbolit_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_ikakbolit_proto_goTypes = []any{
-	(*Schedule)(nil),              // 0: ikakbolit.Schedule
-	(*ResponseScheduleID)(nil),    // 1: ikakbolit.ResponseScheduleID
-	(*ScheduleIDsResponse)(nil),   // 2: ikakbolit.ScheduleIDsResponse
-	(*SchedulesInWindow)(nil),     // 3: ikakbolit.SchedulesInWindow
-	(*UserIDRequest)(nil),         // 4: ikakbolit.UserIDRequest
-	(*ScheduleRequest)(nil),       // 5: ikakbolit.ScheduleRequest
-	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
+	(*RequestSchedule)(nil),         // 0: ikakbolit.RequestSchedule
+	(*ResponseScheduleID)(nil),      // 1: ikakbolit.ResponseScheduleID
+	(*RequestUserID)(nil),           // 2: ikakbolit.RequestUserID
+	(*ResponseScheduleIDs)(nil),     // 3: ikakbolit.ResponseScheduleIDs
+	(*RequestUserIDScheduleID)(nil), // 4: ikakbolit.RequestUserIDScheduleID
+	(*ResponseSchedule)(nil),        // 5: ikakbolit.ResponseSchedule
+	(*RequestNextTakings)(nil),      // 6: ikakbolit.RequestNextTakings
+	(*ResponseNextTakings)(nil),     // 7: ikakbolit.ResponseNextTakings
+	(*timestamppb.Timestamp)(nil),   // 8: google.protobuf.Timestamp
 }
 var file_ikakbolit_proto_depIdxs = []int32{
-	6, // 0: ikakbolit.Schedule.created_at:type_name -> google.protobuf.Timestamp
-	6, // 1: ikakbolit.Schedule.day_start:type_name -> google.protobuf.Timestamp
-	6, // 2: ikakbolit.Schedule.day_finish:type_name -> google.protobuf.Timestamp
-	0, // 3: ikakbolit.SchedulesInWindow.schedules:type_name -> ikakbolit.Schedule
-	0, // 4: ikakbolit.IkakbolitService.AddSchedule:input_type -> ikakbolit.Schedule
-	4, // 5: ikakbolit.IkakbolitService.GetScheduleIDs:input_type -> ikakbolit.UserIDRequest
-	5, // 6: ikakbolit.IkakbolitService.GetSchedule:input_type -> ikakbolit.ScheduleRequest
-	4, // 7: ikakbolit.IkakbolitService.GetNextTakings:input_type -> ikakbolit.UserIDRequest
-	1, // 8: ikakbolit.IkakbolitService.AddSchedule:output_type -> ikakbolit.ResponseScheduleID
-	2, // 9: ikakbolit.IkakbolitService.GetScheduleIDs:output_type -> ikakbolit.ScheduleIDsResponse
-	0, // 10: ikakbolit.IkakbolitService.GetSchedule:output_type -> ikakbolit.Schedule
-	3, // 11: ikakbolit.IkakbolitService.GetNextTakings:output_type -> ikakbolit.SchedulesInWindow
-	8, // [8:12] is the sub-list for method output_type
-	4, // [4:8] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	8, // 0: ikakbolit.ResponseSchedule.created_at:type_name -> google.protobuf.Timestamp
+	5, // 1: ikakbolit.ResponseNextTakings.schedules:type_name -> ikakbolit.ResponseSchedule
+	0, // 2: ikakbolit.IkakbolitService.AddSchedule:input_type -> ikakbolit.RequestSchedule
+	2, // 3: ikakbolit.IkakbolitService.GetScheduleIDs:input_type -> ikakbolit.RequestUserID
+	4, // 4: ikakbolit.IkakbolitService.GetSchedule:input_type -> ikakbolit.RequestUserIDScheduleID
+	6, // 5: ikakbolit.IkakbolitService.GetNextTakings:input_type -> ikakbolit.RequestNextTakings
+	1, // 6: ikakbolit.IkakbolitService.AddSchedule:output_type -> ikakbolit.ResponseScheduleID
+	3, // 7: ikakbolit.IkakbolitService.GetScheduleIDs:output_type -> ikakbolit.ResponseScheduleIDs
+	5, // 8: ikakbolit.IkakbolitService.GetSchedule:output_type -> ikakbolit.ResponseSchedule
+	7, // 9: ikakbolit.IkakbolitService.GetNextTakings:output_type -> ikakbolit.ResponseNextTakings
+	6, // [6:10] is the sub-list for method output_type
+	2, // [2:6] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_ikakbolit_proto_init() }
@@ -447,7 +547,7 @@ func file_ikakbolit_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ikakbolit_proto_rawDesc), len(file_ikakbolit_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

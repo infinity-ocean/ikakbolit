@@ -6,44 +6,50 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/grpc/ikakbolit";
 
-message Schedule {
-  int64 id = 1;
-  int64 user_id = 2;
-  string cure_name = 3;
-  int64 doses_per_day = 4;
-  int64 duration_days = 5;
-  google.protobuf.Timestamp created_at = 6;
-
-  google.protobuf.Timestamp day_start = 7;
-  google.protobuf.Timestamp day_finish = 8;
-
-  repeated string intakes = 9;
+message RequestSchedule {
+  int64 user_id = 1;
+  string cure_name = 2;
+  int64 doses_per_day = 3;
+  int64 duration_days = 4;
 }
 
 message ResponseScheduleID {
   int64 schedule_id = 1;
 }
 
-message ScheduleIDsResponse {
-  repeated int64 ids = 1;
-}
-
-message SchedulesInWindow {
-  repeated Schedule schedules = 1;
-}
-
-message UserIDRequest {
+message RequestUserID {
   int64 user_id = 1;
 }
 
-message ScheduleRequest {
+message ResponseScheduleIDs {
+  repeated int64 schdedule_ids = 1;
+}
+
+message RequestUserIDScheduleID {
   int64 user_id = 1;
   int64 schedule_id = 2;
 }
- 
+message ResponseSchedule {
+  int64 id = 1;
+  int64 user_id = 2;
+  string cure_name = 3;
+  int64 doses_per_day = 4;
+  int64 duration_days = 5;
+  google.protobuf.Timestamp created_at = 6;
+  repeated string intakes = 7;
+}
+
+message RequestNextTakings {
+  int64 user_id = 1;
+}
+
+message ResponseNextTakings {
+  repeated ResponseSchedule schedules = 1;
+}
+  
 service IkakbolitService {
-  rpc AddSchedule(Schedule) returns (ResponseScheduleID);
-  rpc GetScheduleIDs(UserIDRequest) returns (ScheduleIDsResponse);
-  rpc GetSchedule(ScheduleRequest) returns (Schedule);
-  rpc GetNextTakings(UserIDRequest) returns (SchedulesInWindow);
+  rpc AddSchedule(RequestSchedule) returns (ResponseScheduleID);
+  rpc GetScheduleIDs(RequestUserID) returns (ResponseScheduleIDs);
+  rpc GetSchedule(RequestUserIDScheduleID) returns (ResponseSchedule);
+  rpc GetNextTakings(RequestNextTakings) returns (ResponseNextTakings);
 }

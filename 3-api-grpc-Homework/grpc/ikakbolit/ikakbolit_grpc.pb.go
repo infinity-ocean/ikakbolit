@@ -29,10 +29,10 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type IkakbolitServiceClient interface {
-	AddSchedule(ctx context.Context, in *Schedule, opts ...grpc.CallOption) (*ResponseScheduleID, error)
-	GetScheduleIDs(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*ScheduleIDsResponse, error)
-	GetSchedule(ctx context.Context, in *ScheduleRequest, opts ...grpc.CallOption) (*Schedule, error)
-	GetNextTakings(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*SchedulesInWindow, error)
+	AddSchedule(ctx context.Context, in *RequestSchedule, opts ...grpc.CallOption) (*ResponseScheduleID, error)
+	GetScheduleIDs(ctx context.Context, in *RequestUserID, opts ...grpc.CallOption) (*ResponseScheduleIDs, error)
+	GetSchedule(ctx context.Context, in *RequestUserIDScheduleID, opts ...grpc.CallOption) (*ResponseSchedule, error)
+	GetNextTakings(ctx context.Context, in *RequestNextTakings, opts ...grpc.CallOption) (*ResponseNextTakings, error)
 }
 
 type ikakbolitServiceClient struct {
@@ -43,7 +43,7 @@ func NewIkakbolitServiceClient(cc grpc.ClientConnInterface) IkakbolitServiceClie
 	return &ikakbolitServiceClient{cc}
 }
 
-func (c *ikakbolitServiceClient) AddSchedule(ctx context.Context, in *Schedule, opts ...grpc.CallOption) (*ResponseScheduleID, error) {
+func (c *ikakbolitServiceClient) AddSchedule(ctx context.Context, in *RequestSchedule, opts ...grpc.CallOption) (*ResponseScheduleID, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResponseScheduleID)
 	err := c.cc.Invoke(ctx, IkakbolitService_AddSchedule_FullMethodName, in, out, cOpts...)
@@ -53,9 +53,9 @@ func (c *ikakbolitServiceClient) AddSchedule(ctx context.Context, in *Schedule, 
 	return out, nil
 }
 
-func (c *ikakbolitServiceClient) GetScheduleIDs(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*ScheduleIDsResponse, error) {
+func (c *ikakbolitServiceClient) GetScheduleIDs(ctx context.Context, in *RequestUserID, opts ...grpc.CallOption) (*ResponseScheduleIDs, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ScheduleIDsResponse)
+	out := new(ResponseScheduleIDs)
 	err := c.cc.Invoke(ctx, IkakbolitService_GetScheduleIDs_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -63,9 +63,9 @@ func (c *ikakbolitServiceClient) GetScheduleIDs(ctx context.Context, in *UserIDR
 	return out, nil
 }
 
-func (c *ikakbolitServiceClient) GetSchedule(ctx context.Context, in *ScheduleRequest, opts ...grpc.CallOption) (*Schedule, error) {
+func (c *ikakbolitServiceClient) GetSchedule(ctx context.Context, in *RequestUserIDScheduleID, opts ...grpc.CallOption) (*ResponseSchedule, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Schedule)
+	out := new(ResponseSchedule)
 	err := c.cc.Invoke(ctx, IkakbolitService_GetSchedule_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -73,9 +73,9 @@ func (c *ikakbolitServiceClient) GetSchedule(ctx context.Context, in *ScheduleRe
 	return out, nil
 }
 
-func (c *ikakbolitServiceClient) GetNextTakings(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*SchedulesInWindow, error) {
+func (c *ikakbolitServiceClient) GetNextTakings(ctx context.Context, in *RequestNextTakings, opts ...grpc.CallOption) (*ResponseNextTakings, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SchedulesInWindow)
+	out := new(ResponseNextTakings)
 	err := c.cc.Invoke(ctx, IkakbolitService_GetNextTakings_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -87,10 +87,10 @@ func (c *ikakbolitServiceClient) GetNextTakings(ctx context.Context, in *UserIDR
 // All implementations must embed UnimplementedIkakbolitServiceServer
 // for forward compatibility.
 type IkakbolitServiceServer interface {
-	AddSchedule(context.Context, *Schedule) (*ResponseScheduleID, error)
-	GetScheduleIDs(context.Context, *UserIDRequest) (*ScheduleIDsResponse, error)
-	GetSchedule(context.Context, *ScheduleRequest) (*Schedule, error)
-	GetNextTakings(context.Context, *UserIDRequest) (*SchedulesInWindow, error)
+	AddSchedule(context.Context, *RequestSchedule) (*ResponseScheduleID, error)
+	GetScheduleIDs(context.Context, *RequestUserID) (*ResponseScheduleIDs, error)
+	GetSchedule(context.Context, *RequestUserIDScheduleID) (*ResponseSchedule, error)
+	GetNextTakings(context.Context, *RequestNextTakings) (*ResponseNextTakings, error)
 	mustEmbedUnimplementedIkakbolitServiceServer()
 }
 
@@ -101,16 +101,16 @@ type IkakbolitServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedIkakbolitServiceServer struct{}
 
-func (UnimplementedIkakbolitServiceServer) AddSchedule(context.Context, *Schedule) (*ResponseScheduleID, error) {
+func (UnimplementedIkakbolitServiceServer) AddSchedule(context.Context, *RequestSchedule) (*ResponseScheduleID, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddSchedule not implemented")
 }
-func (UnimplementedIkakbolitServiceServer) GetScheduleIDs(context.Context, *UserIDRequest) (*ScheduleIDsResponse, error) {
+func (UnimplementedIkakbolitServiceServer) GetScheduleIDs(context.Context, *RequestUserID) (*ResponseScheduleIDs, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetScheduleIDs not implemented")
 }
-func (UnimplementedIkakbolitServiceServer) GetSchedule(context.Context, *ScheduleRequest) (*Schedule, error) {
+func (UnimplementedIkakbolitServiceServer) GetSchedule(context.Context, *RequestUserIDScheduleID) (*ResponseSchedule, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSchedule not implemented")
 }
-func (UnimplementedIkakbolitServiceServer) GetNextTakings(context.Context, *UserIDRequest) (*SchedulesInWindow, error) {
+func (UnimplementedIkakbolitServiceServer) GetNextTakings(context.Context, *RequestNextTakings) (*ResponseNextTakings, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNextTakings not implemented")
 }
 func (UnimplementedIkakbolitServiceServer) mustEmbedUnimplementedIkakbolitServiceServer() {}
@@ -135,7 +135,7 @@ func RegisterIkakbolitServiceServer(s grpc.ServiceRegistrar, srv IkakbolitServic
 }
 
 func _IkakbolitService_AddSchedule_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Schedule)
+	in := new(RequestSchedule)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -147,13 +147,13 @@ func _IkakbolitService_AddSchedule_Handler(srv interface{}, ctx context.Context,
 		FullMethod: IkakbolitService_AddSchedule_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IkakbolitServiceServer).AddSchedule(ctx, req.(*Schedule))
+		return srv.(IkakbolitServiceServer).AddSchedule(ctx, req.(*RequestSchedule))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _IkakbolitService_GetScheduleIDs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserIDRequest)
+	in := new(RequestUserID)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -165,13 +165,13 @@ func _IkakbolitService_GetScheduleIDs_Handler(srv interface{}, ctx context.Conte
 		FullMethod: IkakbolitService_GetScheduleIDs_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IkakbolitServiceServer).GetScheduleIDs(ctx, req.(*UserIDRequest))
+		return srv.(IkakbolitServiceServer).GetScheduleIDs(ctx, req.(*RequestUserID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _IkakbolitService_GetSchedule_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ScheduleRequest)
+	in := new(RequestUserIDScheduleID)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -183,13 +183,13 @@ func _IkakbolitService_GetSchedule_Handler(srv interface{}, ctx context.Context,
 		FullMethod: IkakbolitService_GetSchedule_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IkakbolitServiceServer).GetSchedule(ctx, req.(*ScheduleRequest))
+		return srv.(IkakbolitServiceServer).GetSchedule(ctx, req.(*RequestUserIDScheduleID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _IkakbolitService_GetNextTakings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserIDRequest)
+	in := new(RequestNextTakings)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -201,7 +201,7 @@ func _IkakbolitService_GetNextTakings_Handler(srv interface{}, ctx context.Conte
 		FullMethod: IkakbolitService_GetNextTakings_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IkakbolitServiceServer).GetNextTakings(ctx, req.(*UserIDRequest))
+		return srv.(IkakbolitServiceServer).GetNextTakings(ctx, req.(*RequestNextTakings))
 	}
 	return interceptor(ctx, in, info, handler)
 }

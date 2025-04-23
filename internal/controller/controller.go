@@ -31,7 +31,6 @@ func New(svc service, port string) *controller {
 }
 
 func (c *controller) Run() error {
-	
 	router := mux.NewRouter()
 	router.PathPrefix("/swagger/").Handler(swagger.Handler(
 		swagger.URL("http://localhost:8080/swagger/doc.json"),

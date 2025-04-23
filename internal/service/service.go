@@ -13,6 +13,11 @@ type service struct {
 	repo repo
 }
 
+// GetSchedule implements controller.IkakbolitService.
+func (s *service) GetSchedule(int, int) (model.Schedule, error) {
+	panic("unimplemented")
+}
+
 type repo interface {
 	InsertSchedule(model.Schedule) (int, error)
 	SelectSchedules(int) ([]model.Schedule, error)
@@ -102,12 +107,12 @@ func (s *service) GetNextTakings(userID int) ([]model.Schedule, error) {
 			if intakeTime.Before(now) {
 				intakeTime = intakeTime.Add(24 * time.Hour)
 			}
-		
+
 			if intakeTime.After(now) && intakeTime.Before(now.Add(windowDuration)) {
 				result = append(result, schedule)
 				break
 			}
-		}		
+		}
 	}
 
 	return result, nil

@@ -1,7 +1,7 @@
 # ikakbolit - Medication Scheduling App 🏥
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
-![Go Version](https://img.shields.io/badge/Go-1.23.3-blue)
+![Go Version](https://img.shields.io/badge/Go-1.23.8-blue)
 ![Docker](https://img.shields.io/badge/Docker-Supported-blue)
 
 **ikakbolit** — это бэкенд-сервис для удобного планирования приёма лекарств. Он позволяет пользователям управлять расписанием приёма медикаментов, отслеживать ближайшие приёмы и получать данные о назначенных лекарствах. В качестве БД используется **[PostgreSQL](https://www.postgresql.org)**

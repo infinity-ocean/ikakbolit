@@ -6,6 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 	"log"
+	"net"
+	"google.golang.org/grpc"
+	pb "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/grpc/ikakbolit"
 
 	"github.com/infinity-ocean/ikakbolit/internal/config"
 	"github.com/infinity-ocean/ikakbolit/internal/controller"
@@ -47,11 +50,17 @@ func main() {
 	svc := service.New(repo)
 	ctrl := controller.New(svc, ":8080")
 
-	grpcSrv := controller.NewGrpcServer(svc)
+	grpcSrv := grpc.NewServer()
+	pb.RegisterIkakbolitServiceServer(grpcSrv, controller.NewGRPCServer(svc))
 
 	go func() {
-		if err := controller.StartGrpcServer(grpcSrv, "50051"); err != nil {
-			log.Fatalf("failed to start gRPC server: %v", err)
+		lis, err := net.Listen("tcp", ":50051")
+		if err != nil {
+			log.Fatalf("failed to listen: %v", err)
+		}
+		log.Println("Starting gRPC server on :50051")
+		if err := grpcSrv.Serve(lis); err != nil {
+			log.Fatalf("failed to serve gRPC: %v", err)
 		}
 	}()
 
