@@ -40,7 +40,7 @@ func (c *controller) Run() error {
 	)).Methods(http.MethodGet)
 	router.Handle("/swagger/", http.StripPrefix("/swagger/", swagger.WrapHandler))
 	router.HandleFunc("/schedule", httpWrapper(c.addSchedule)).Methods("POST")
-	router.HandleFunc("/schedules", httpWrapper(c.getScheduleIDs)).Methods("GET")
+	router.HandleFunc("/schedulesResp", httpWrapper(c.getScheduleIDs)).Methods("GET")
 	router.HandleFunc("/schedule", httpWrapper(c.getSchedule)).Methods("GET")
 	router.HandleFunc("/next_takings", httpWrapper(c.getNextTakings)).Methods("GET")
 
@@ -59,12 +59,12 @@ func (c *controller) Run() error {
 // @Failure 500 {object} APIError "Internal server error"
 // @Router /schedule [post]
 func (c *controller) addSchedule(w http.ResponseWriter, r *http.Request) error {
-	schedule := &Schedule{}
-	if err := json.NewDecoder(r.Body).Decode(schedule); err != nil {
+	schedule := Schedule{}
+	if err := json.NewDecoder(r.Body).Decode(&schedule); err != nil {
 		return fmt.Errorf("incorrect input: %w.\ninternal error: %s", model.ErrBadRequest, err)
 	}
 
-	scheduleModel := toModelSchedule(*schedule)
+	scheduleModel := toModelSchedule(schedule)
 	scheduleID, err := c.service.AddSchedule(scheduleModel)
 	if err != nil {
 		return err
@@ -74,7 +74,7 @@ func (c *controller) addSchedule(w http.ResponseWriter, r *http.Request) error {
 	return writeJSONtoHTTP(w, http.StatusCreated, response)
 }
 
-// @Summary Get user schedules
+// @Summary Get user schedulesResp
 // @Description Retrieve schedule IDs for a given user
 // @Produce json
 // @Param   user_id query int true "User ID"
@@ -83,7 +83,7 @@ func (c *controller) addSchedule(w http.ResponseWriter, r *http.Request) error {
 // @Failure 400 {object} APIError "Bad request"
 // @Failure 404 {object} APIError "Resource not found"
 // @Failure 500 {object} APIError "Internal server error"
-// @Router /schedules [get]
+// @Router /schedulesResp [get]
 func (c *controller) getScheduleIDs(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
@@ -121,6 +121,7 @@ func (c *controller) getSchedule(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return writeJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect user_id: %w", err))
 	}
+	
 	scheduleID, err := strconv.Atoi(r.URL.Query().Get("schedule_id"))
 	if err != nil {
 		return writeJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect schedule_id: %w", err))
@@ -139,7 +140,7 @@ func (c *controller) getSchedule(w http.ResponseWriter, r *http.Request) error {
 }
 
 // @Summary Get next scheduled takings
-// @Description Retrieve upcoming medication schedules for a user
+// @Description Retrieve upcoming medication schedulesResp for a user
 // @Produce json
 // @Param   user_id query int true "User ID"
 // @Success 200 {object} Schedule
@@ -154,20 +155,24 @@ func (c *controller) getNextTakings(w http.ResponseWriter, r *http.Request) erro
 		return writeJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect user_id: %w", err))
 	}
 
-	schedulesRaw, err := c.service.GetNextTakings(userID)
+	schedules, err := c.service.GetNextTakings(userID)
 	if err != nil {
 		return err
-	}
-
-	schedules := make([]Schedule, 0, len(schedulesRaw))
-	for _, s := range schedulesRaw {
- 		schedules = append(schedules, Schedule(s))
 	}
 
 	if len(schedules) == 0 {
 		return writeJSONtoHTTP(w, http.StatusNoContent, schedules)
 	}
 
-	response := SchedulesInWindow{Schedules: schedules}
+	response := SchedulesInWindow{Schedules: fromModelSchedule(schedules)}
 	return writeJSONtoHTTP(w, http.StatusOK, response)
+}
+
+func fromModelSchedule(schedules []model.Schedule) []Schedule {
+	schedulesResp := make([]Schedule, 0, len(schedules))
+	for _, s := range schedules {
+ 		schedulesResp = append(schedulesResp, Schedule(s))
+	}
+
+	return schedulesResp
 }
