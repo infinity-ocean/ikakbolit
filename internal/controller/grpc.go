@@ -15,16 +15,16 @@ type IkakbolitService interface {
     GetNextTakings(int) ([]model.Schedule, error)
 }
 
-type server struct {
+type gRPCServer struct {
     pb.UnimplementedIkakbolitServiceServer
     svc IkakbolitService
 }
 
-func NewGRPCServer(svc IkakbolitService) *server {
-    return &server{svc: svc}
+func NewGRPCServer(svc IkakbolitService) *gRPCServer {
+    return &gRPCServer{svc: svc}
 }
 
-func (s *server) AddSchedule(ctx context.Context, req *pb.RequestSchedule) (*pb.ResponseScheduleID, error) {
+func (s *gRPCServer) AddSchedule(ctx context.Context, req *pb.RequestSchedule) (*pb.ResponseScheduleID, error) {
     schedule := model.Schedule{
         UserID:       int(req.UserId),
         CureName:     req.CureName,
@@ -38,7 +38,7 @@ func (s *server) AddSchedule(ctx context.Context, req *pb.RequestSchedule) (*pb.
     return &pb.ResponseScheduleID{ScheduleId: int64(id)}, nil
 }
 
-func (s *server) GetScheduleIDs(ctx context.Context, req *pb.RequestUserID) (*pb.ResponseScheduleIDs, error) {
+func (s *gRPCServer) GetScheduleIDs(ctx context.Context, req *pb.RequestUserID) (*pb.ResponseScheduleIDs, error) {
     ids, err := s.svc.GetScheduleIDs(int(req.UserId))
     if err != nil {
         return nil, err
@@ -50,7 +50,7 @@ func (s *server) GetScheduleIDs(ctx context.Context, req *pb.RequestUserID) (*pb
     return out, nil
 }
 
-func (s *server) GetSchedule(ctx context.Context, req *pb.RequestUserIDScheduleID) (*pb.ResponseSchedule, error) {
+func (s *gRPCServer) GetSchedule(ctx context.Context, req *pb.RequestUserIDScheduleID) (*pb.ResponseSchedule, error) {
     sched, err := s.svc.GetSchedule(int(req.UserId), int(req.ScheduleId))
     if err != nil {
         return nil, err
@@ -66,7 +66,7 @@ func (s *server) GetSchedule(ctx context.Context, req *pb.RequestUserIDScheduleI
     }, nil
 }
 
-func (s *server) GetNextTakings(ctx context.Context, req *pb.RequestNextTakings) (*pb.ResponseNextTakings, error) {
+func (s *gRPCServer) GetNextTakings(ctx context.Context, req *pb.RequestNextTakings) (*pb.ResponseNextTakings, error) {
     schedules, err := s.svc.GetNextTakings(int(req.UserId))
     if err != nil {
         return nil, err
