@@ -16,7 +16,7 @@ stop-infra:
 	
 # ДЗ №3 кодогенерация на основе openapi 
 swagger-gen:
-	swagger generate server -f internal/3-api-grpc-Homework/docs/swagger.yaml -A ikakbolit --target gen/server
+	swagger generate server -f internal/3-api-grpc-Homework/docs/swagger.yaml -A ikakbolit --target internal/3-api-grpc-Homework/server
 
 proto-gen:
 	protoc \
