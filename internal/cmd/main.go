@@ -31,9 +31,7 @@ func main() {
 	log.Println("program is started")
 
 	if err := godotenv.Load(); err != nil {
-		if err := godotenv.Load("../../.env"); err != nil {
-			log.Fatal(err)
-		}
+		log.Fatal(err)
 	}
 
 	conf := config.Config{}
