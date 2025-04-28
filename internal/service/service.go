@@ -13,11 +13,6 @@ type service struct {
 	repo repo
 }
 
-// GetSchedule implements controller.IkakbolitService.
-func (s *service) GetSchedule(int, int) (model.Schedule, error) {
-	panic("unimplemented")
-}
-
 type repo interface {
 	InsertSchedule(model.Schedule) (int, error)
 	SelectSchedules(int) ([]model.Schedule, error)

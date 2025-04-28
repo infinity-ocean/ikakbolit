@@ -14,7 +14,7 @@ import (
 type IkakbolitService interface {
     AddSchedule(model.Schedule) (int, error)
     GetScheduleIDs(int) ([]int, error)
-    GetSchedule(int, int) (model.Schedule, error)
+    GetScheduleWithIntake(int, int) (model.Schedule, error)
     GetNextTakings(int) ([]model.Schedule, error)
 }
 
@@ -68,7 +68,7 @@ func (s *gRPCServer) GetScheduleIDs(ctx context.Context, req *pb.RequestUserID) 
 }
 
 func (s *gRPCServer) GetSchedule(ctx context.Context, req *pb.RequestUserIDScheduleID) (*pb.ResponseSchedule, error) {
-    sched, err := s.svc.GetSchedule(int(req.UserId), int(req.ScheduleId))
+    sched, err := s.svc.GetScheduleWithIntake(int(req.UserId), int(req.ScheduleId))
     if err != nil {
         return nil, err
     }
