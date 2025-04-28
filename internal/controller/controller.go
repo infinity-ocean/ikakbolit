@@ -44,7 +44,7 @@ func (c *controller) Run() error {
 	router.HandleFunc("/schedule", httpWrapper(c.getSchedule)).Methods("GET")
 	router.HandleFunc("/next_takings", httpWrapper(c.getNextTakings)).Methods("GET")
 
-	log.Println("Starting server on ", c.listenPort)
+	log.Println("Starting server on", c.listenPort)
 	return http.ListenAndServe(c.listenPort, router)
 }
 
