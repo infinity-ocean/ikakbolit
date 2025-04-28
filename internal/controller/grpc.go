@@ -1,11 +1,14 @@
-
 package controller
 
 import (
-    "google.golang.org/protobuf/types/known/timestamppb"
-    "context"
-    pb "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/grpc/ikakbolit"
-    "github.com/infinity-ocean/ikakbolit/internal/model"
+	"context"
+	"log"
+	"net"
+
+	pb "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/grpc/ikakbolit"
+	"github.com/infinity-ocean/ikakbolit/internal/model"
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type IkakbolitService interface {
@@ -18,10 +21,24 @@ type IkakbolitService interface {
 type gRPCServer struct {
     pb.UnimplementedIkakbolitServiceServer
     svc IkakbolitService
+    port string
 }
 
-func NewGRPCServer(svc IkakbolitService) *gRPCServer {
-    return &gRPCServer{svc: svc}
+func NewGRPCServer(svc IkakbolitService, port string) *gRPCServer {
+    return &gRPCServer{svc: svc, port: port}
+}
+
+func (s *gRPCServer) Run() error {
+	lis, err := net.Listen("tcp", s.port)
+	if err != nil {
+		return err
+	}
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterIkakbolitServiceServer(grpcServer, s)
+
+	log.Println("Starting gRPC server on", s.port)
+	return grpcServer.Serve(lis)
 }
 
 func (s *gRPCServer) AddSchedule(ctx context.Context, req *pb.RequestSchedule) (*pb.ResponseScheduleID, error) {

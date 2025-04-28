@@ -6,9 +6,6 @@ import (
 	"os/signal"
 	"syscall"
 	"log"
-	"net"
-	"google.golang.org/grpc"
-	pb "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/grpc/ikakbolit"
 
 	"github.com/infinity-ocean/ikakbolit/internal/config"
 	"github.com/infinity-ocean/ikakbolit/internal/controller"
@@ -46,26 +43,20 @@ func main() {
 
 	repo := repo.New(pool)
 	svc := service.New(repo)
-	ctrl := controller.New(svc, ":8080")
-
-	grpcSrv := grpc.NewServer()
-	pb.RegisterIkakbolitServiceServer(grpcSrv, controller.NewGRPCServer(svc))
+	grpcCtrl := controller.NewGRPCServer(svc, ":50051")
 
 	go func() {
-		lis, err := net.Listen("tcp", ":50051")
-		if err != nil {
-			log.Fatalf("failed to listen: %v", err)
-		}
-		log.Println("Starting gRPC server on :50051")
-		if err := grpcSrv.Serve(lis); err != nil {
-			log.Fatalf("failed to serve gRPC: %v", err)
-		}
+	    if err := grpcCtrl.Run(); err != nil {
+	        log.Fatalf("failed to start gRPC server: %v", err)
+	    }
 	}()
 
+	restCtrl := controller.New(svc, ":8080")
+
 	go func() {
-		if err := ctrl.Run(); err != nil {
-			log.Fatalf("failed to start REST server: %v", err)
-		}
+	    if err := restCtrl.Run(); err != nil {
+	        log.Fatalf("failed to start REST server: %v", err)
+	    }
 	}()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
