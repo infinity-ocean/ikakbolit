@@ -23,15 +23,15 @@ func NewLogger() (*slog.Logger, error) {
 	mw := io.MultiWriter(os.Stdout, file)
 
 	var level slog.Level
-
 	levelStr := os.Getenv("LOGGING_LEVEL")
+
 	switch levelStr {
-	case "INFO":
-		level = slog.LevelInfo
 	case "ERROR":
 		level = slog.LevelError
 	case "DEBUG":
 		level = slog.LevelDebug
+	default:
+		level = slog.LevelInfo
 	}
 
 	handler := slog.NewJSONHandler(mw, &slog.HandlerOptions{
