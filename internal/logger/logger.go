@@ -4,7 +4,6 @@ import (
 	"io"
 	"log/slog"
 	"os"
-	"strconv"
 )
 
 type logger struct {
@@ -22,34 +21,22 @@ func NewLogger() (*slog.Logger, error) {
 	}
 
 	mw := io.MultiWriter(os.Stdout, file)
-	level, err := strconv.Atoi(os.Getenv("LOGGING_LEVEL"))
-	if err != nil {
-		return nil, err
+
+	var level slog.Level
+
+	levelStr := os.Getenv("LOGGING_LEVEL")
+	switch levelStr {
+	case "INFO":
+		level = slog.LevelInfo
+	case "ERROR":
+		level = slog.LevelError
+	case "DEBUG":
+		level = slog.LevelDebug
 	}
 
 	handler := slog.NewJSONHandler(mw, &slog.HandlerOptions{
-		Level: slog.Level(level),
+		Level: level,
 	})
 
 	return slog.New(handler), nil
-}
-
-func (l *logger) Info(msg string, args ...any) {
-	l.logger.Info(msg, args...)
-}
-
-func (l *logger) Error(msg string, args ...any) {
-	l.logger.Error(msg, args...)
-}
-
-func (l *logger) Warn(msg string, args ...any) {
-	l.logger.Warn(msg, args...)
-}
-
-func (l *logger) Debug(msg string, args ...any) {
-	l.logger.Debug(msg, args...)
-}
-
-func (l *logger) Close() error {
-	return l.file.Close()
 }
