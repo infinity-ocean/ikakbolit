@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"log/slog"
+
 	"net/http"
 	"strconv"
 
@@ -17,6 +19,7 @@ import (
 type controller struct {
 	service    service
 	listenPort string
+	logger *slog.Logger
 }
 
 type service interface {
