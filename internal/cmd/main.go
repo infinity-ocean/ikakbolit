@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"log"
+
 	"os"
 	"os/signal"
 	"syscall"
-	"log"
 
 	"github.com/infinity-ocean/ikakbolit/internal/controller"
+	"github.com/infinity-ocean/ikakbolit/internal/logger"
 	"github.com/infinity-ocean/ikakbolit/internal/repo"
 	"github.com/infinity-ocean/ikakbolit/internal/service"
 	"github.com/joho/godotenv"
@@ -24,15 +26,17 @@ import (
 // @BasePath /
 
 func main() {
-	log.Println("program is started")
-
 	if err := godotenv.Load(); err != nil {
 		log.Fatal(err)
 	}
+	
+	log := logger.MustInitLogger()
+
+	log.Info("program is started")
 
 	pool, err := repo.MakePool()
 	if err != nil {
-		log.Println(err)
+		log.Error("can't create pool", "err", err)
 	}
 
 	repo := repo.New(pool)
@@ -41,7 +45,7 @@ func main() {
 
 	go func() {
 	    if err := grpcCtrl.Run(); err != nil {
-	        log.Fatalf("failed to start gRPC server: %v", err)
+	        log.Error("failed to start gRPC server: %v", "err", err)
 	    }
 	}()
 
@@ -49,7 +53,8 @@ func main() {
 
 	go func() {
 	    if err := restCtrl.Run(); err != nil {
-	        log.Fatalf("failed to start REST server: %v", err)
+			log.Error("failed to start REST server: %v", "err", err)
+
 	    }
 	}()
 
@@ -57,5 +62,5 @@ func main() {
 	defer stop()
 
 	<-ctx.Done()
-	log.Println("Shutting down servers...")
+	log.Info("Shutting down servers...")
 }
