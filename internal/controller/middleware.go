@@ -9,8 +9,8 @@ import (
 	"github.com/infinity-ocean/ikakbolit/internal/model"
 )
 
-func httpWrapper(f func(w http.ResponseWriter, r *http.Request) error) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
+func httpWrapper(f func(w http.ResponseWriter, r *http.Request) error) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		err := f(w, r)
 		if err == nil {
 			return
@@ -28,9 +28,8 @@ func httpWrapper(f func(w http.ResponseWriter, r *http.Request) error) func(http
 			writeJSONtoHTTP(w, http.StatusInternalServerError, APIError{Message: err.Error()})
 		default:
 			writeJSONtoHTTP(w, http.StatusInternalServerError, APIError{Message: err.Error()})
-
 		}
-	}
+	})
 }
 
 func writeJSONtoHTTP(w http.ResponseWriter, code int, v any) error {

@@ -9,17 +9,17 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"github.com/infinity-ocean/ikakbolit/internal/model"
 
 	_ "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/docs"
 	swagger "github.com/swaggo/http-swagger"
 )
 
-type controller struct {
+type restServer struct {
 	service    service
 	listenPort string
-	logger *slog.Logger
+	logger     *slog.Logger
 }
 
 type service interface {
@@ -29,23 +29,24 @@ type service interface {
 	GetNextTakings(int) ([]model.Schedule, error)
 }
 
-func New(svc service, port string) *controller {
-	return &controller{service: svc, listenPort: port}
+func NewRestServer(svc service, port string) *restServer {
+	return &restServer{service: svc, listenPort: port}
 }
 
-func (c *controller) Run() error {
-	router := mux.NewRouter()
-	router.PathPrefix("/swagger/").Handler(swagger.Handler(
+func (c *restServer) Run() error {
+	router := chi.NewRouter()
+
+	router.Mount("/swagger", swagger.Handler(
 		swagger.URL("http://localhost:8080/swagger/doc.json"),
 		swagger.DeepLinking(true),
 		swagger.DocExpansion("none"),
 		swagger.DomID("swagger-ui"),
-	)).Methods(http.MethodGet)
-	router.Handle("/swagger/", http.StripPrefix("/swagger/", swagger.WrapHandler))
-	router.HandleFunc("/schedule", httpWrapper(c.addSchedule)).Methods("POST")
-	router.HandleFunc("/schedulesResp", httpWrapper(c.getScheduleIDs)).Methods("GET")
-	router.HandleFunc("/schedule", httpWrapper(c.getSchedule)).Methods("GET")
-	router.HandleFunc("/next_takings", httpWrapper(c.getNextTakings)).Methods("GET")
+	))
+
+	router.Method("POST", "/schedule", httpWrapper(c.addSchedule))
+	router.Method("GET", "/schedulesResp", httpWrapper(c.getScheduleIDs))
+	router.Method("GET", "/schedule", httpWrapper(c.getSchedule))
+	router.Method("GET", "/next_takings", httpWrapper(c.getNextTakings))
 
 	log.Println("Starting server on", c.listenPort)
 	return http.ListenAndServe(c.listenPort, router)
@@ -61,7 +62,7 @@ func (c *controller) Run() error {
 // @Failure 404 {object} APIError "Resource not found"
 // @Failure 500 {object} APIError "Internal server error"
 // @Router /schedule [post]
-func (c *controller) addSchedule(w http.ResponseWriter, r *http.Request) error {
+func (c *restServer) addSchedule(w http.ResponseWriter, r *http.Request) error {
 	schedule := Schedule{}
 	if err := json.NewDecoder(r.Body).Decode(&schedule); err != nil {
 		return fmt.Errorf("incorrect input: %w.\ninternal error: %s", model.ErrBadRequest, err)
@@ -87,7 +88,7 @@ func (c *controller) addSchedule(w http.ResponseWriter, r *http.Request) error {
 // @Failure 404 {object} APIError "Resource not found"
 // @Failure 500 {object} APIError "Internal server error"
 // @Router /schedulesResp [get]
-func (c *controller) getScheduleIDs(w http.ResponseWriter, r *http.Request) error {
+func (c *restServer) getScheduleIDs(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
 		return writeJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect user_id: %w", err))
@@ -119,12 +120,12 @@ func (c *controller) getScheduleIDs(w http.ResponseWriter, r *http.Request) erro
 // @Failure 404 {object} APIError "Resource not found"
 // @Failure 500 {object} APIError "Internal server error"
 // @Router /schedule [get]
-func (c *controller) getSchedule(w http.ResponseWriter, r *http.Request) error {
+func (c *restServer) getSchedule(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
 		return writeJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect user_id: %w", err))
 	}
-	
+
 	scheduleID, err := strconv.Atoi(r.URL.Query().Get("schedule_id"))
 	if err != nil {
 		return writeJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect schedule_id: %w", err))
@@ -152,7 +153,7 @@ func (c *controller) getSchedule(w http.ResponseWriter, r *http.Request) error {
 // @Failure 404 {object} APIError "Resource not found"
 // @Failure 500 {object} APIError "Internal server error"
 // @Router /next_takings [get]
-func (c *controller) getNextTakings(w http.ResponseWriter, r *http.Request) error {
+func (c *restServer) getNextTakings(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
 		return writeJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect user_id: %w", err))
@@ -174,7 +175,7 @@ func (c *controller) getNextTakings(w http.ResponseWriter, r *http.Request) erro
 func fromModelSchedule(schedules []model.Schedule) []Schedule {
 	schedulesResp := make([]Schedule, 0, len(schedules))
 	for _, s := range schedules {
- 		schedulesResp = append(schedulesResp, Schedule(s))
+		schedulesResp = append(schedulesResp, Schedule(s))
 	}
 
 	return schedulesResp

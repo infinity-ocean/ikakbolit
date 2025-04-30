@@ -42,7 +42,7 @@ func main() {
 	svc := service.New(repository)
 
 	grpcCtrl := controller.NewGRPCServer(svc, ":50051")
-	restCtrl := controller.New(svc, ":8080")
+	restCtrl := controller.NewRestServer(svc, ":8080")
 
 	go func() {
 		log.Info("Starting gRPC server on :50051")

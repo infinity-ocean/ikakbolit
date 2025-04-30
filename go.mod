@@ -3,6 +3,7 @@ module github.com/infinity-ocean/ikakbolit
 go 1.23.8
 
 require (
+	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-openapi/errors v0.22.1
 	github.com/go-openapi/loads v0.22.0
 	github.com/go-openapi/runtime v0.28.0
@@ -41,7 +42,6 @@ require (
 )
 
 require (
-	github.com/gorilla/mux v1.8.1
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
