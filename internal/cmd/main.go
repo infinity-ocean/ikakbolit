@@ -7,7 +7,6 @@ import (
 	"syscall"
 	"log"
 
-	"github.com/infinity-ocean/ikakbolit/internal/config"
 	"github.com/infinity-ocean/ikakbolit/internal/controller"
 	"github.com/infinity-ocean/ikakbolit/internal/repo"
 	"github.com/infinity-ocean/ikakbolit/internal/service"
@@ -31,12 +30,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	conf := config.Config{}
-	if err := conf.Parse(); err != nil {
-		log.Println(err)
-	}
-
-	pool, err := repo.MakePool(conf)
+	pool, err := repo.MakePool()
 	if err != nil {
 		log.Println(err)
 	}
