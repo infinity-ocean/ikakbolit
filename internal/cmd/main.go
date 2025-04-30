@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-
 	"os"
 	"os/signal"
 	"syscall"
@@ -27,40 +26,43 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to load .env: %v", err)
 	}
-	
-	log := logger.MustInitLogger()
 
-	log.Info("program is started")
+	log := logger.MustInitLogger()
+	log.Info("Program is starting...")
 
 	pool, err := repo.MakePool()
 	if err != nil {
-		log.Error("can't create pool", "err", err)
+		log.Error("Failed to create database pool:", "err", err)
+		os.Exit(1)
 	}
 
-	repo := repo.New(pool)
-	svc := service.New(repo)
+	repository := repo.New(pool)
+	svc := service.New(repository)
+
 	grpcCtrl := controller.NewGRPCServer(svc, ":50051")
-
-	go func() {
-	    if err := grpcCtrl.Run(); err != nil {
-	        log.Error("failed to start gRPC server: %v", "err", err)
-	    }
-	}()
-
 	restCtrl := controller.New(svc, ":8080")
 
 	go func() {
-	    if err := restCtrl.Run(); err != nil {
-			log.Error("failed to start REST server: %v", "err", err)
+		log.Info("Starting gRPC server on :50051")
+		if err := grpcCtrl.Run(); err != nil {
+			log.Error("gRPC server error:", "err", err)
+			os.Exit(1)
+	}
+	}()
 
-	    }
+	go func() {
+		log.Info("Starting REST server on :8080")
+		if err := restCtrl.Run(); err != nil {
+			log.Error("REST server error:", "err", err)
+			os.Exit(1)
+	}
 	}()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	<-ctx.Done()
-	log.Info("Shutting down servers...")
+	log.Info("Shutdown signal received, shutting down servers...")
 }

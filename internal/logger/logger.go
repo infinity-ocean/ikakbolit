@@ -11,6 +11,16 @@ type logger struct {
 	file   *os.File
 }
 
+func MustInitLogger() *slog.Logger {
+	log, err := NewLogger()
+	if err != nil {
+		log := slog.New(slog.NewTextHandler(os.Stderr, nil))
+		log.Error("failed to initialize logger", slog.Any("err", err))
+		os.Exit(1)
+	}
+	return log
+}
+
 func NewLogger() (*slog.Logger, error) {
 	file, err := os.OpenFile(
 		os.Getenv("LOGGING_FILE_PATH"),
