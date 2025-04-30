@@ -1,0 +1,4 @@
+{"time":"2025-04-30T14:05:49.659109+02:00","level":"INFO","msg":"Program is starting..."}
+{"time":"2025-04-30T14:05:49.661053+02:00","level":"INFO","msg":"Starting gRPC server on :50051"}
+{"time":"2025-04-30T14:05:49.66106+02:00","level":"INFO","msg":"Starting REST server on :8080"}
+{"time":"2025-04-30T14:10:05.34743+02:00","level":"INFO","msg":"Shutdown signal received, shutting down servers..."}
