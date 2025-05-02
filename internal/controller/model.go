@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/infinity-ocean/ikakbolit/internal/model"
@@ -46,3 +47,5 @@ type SchedulesInWindow struct {
 type APIError struct {
 	Message string `json:"message"`
 }
+
+type handlerWithError func(w http.ResponseWriter, r *http.Request) error
