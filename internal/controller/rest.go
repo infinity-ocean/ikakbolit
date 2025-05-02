@@ -44,7 +44,7 @@ func (c *restServer) Run() error {
 	))
 
 	router.Method("POST", "/schedule", httpWrapper(c.addSchedule))
-	router.Method("GET", "/schedulesResp", httpWrapper(c.getScheduleIDs))
+	router.Method("GET", "/schedules", httpWrapper(c.getScheduleIDs))
 	router.Method("GET", "/schedule", httpWrapper(c.getSchedule))
 	router.Method("GET", "/next_takings", httpWrapper(c.getNextTakings))
 
@@ -78,7 +78,7 @@ func (c *restServer) addSchedule(w http.ResponseWriter, r *http.Request) error {
 	return writeJSONtoHTTP(w, http.StatusCreated, response)
 }
 
-// @Summary Get user schedulesResp
+// @Summary Get user schedules
 // @Description Retrieve schedule IDs for a given user
 // @Produce json
 // @Param   user_id query int true "User ID"
@@ -87,7 +87,7 @@ func (c *restServer) addSchedule(w http.ResponseWriter, r *http.Request) error {
 // @Failure 400 {object} APIError "Bad request"
 // @Failure 404 {object} APIError "Resource not found"
 // @Failure 500 {object} APIError "Internal server error"
-// @Router /schedulesResp [get]
+// @Router /schedules [get]
 func (c *restServer) getScheduleIDs(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
