@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
-
 	"net/http"
 	"strconv"
-
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/infinity-ocean/ikakbolit/internal/model"
-
 	_ "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/docs"
 	swagger "github.com/swaggo/http-swagger"
 )
@@ -29,12 +27,18 @@ type service interface {
 	GetNextTakings(int) ([]model.Schedule, error)
 }
 
-func NewRestServer(svc service, port string) *restServer {
-	return &restServer{service: svc, listenPort: port}
+func NewRestServer(svc service, port string, log *slog.Logger) *restServer {
+	return &restServer{service: svc, listenPort: port, logger: log}
 }
 
 func (c *restServer) Run() error {
 	router := chi.NewRouter()
+
+	router.Use(middleware.RequestID)
+	router.Use(middleware.Logger)
+	router.Use(LoggerMiddleware(c.logger))
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.URLFormat)
 
 	router.Mount("/swagger", swagger.Handler(
 		swagger.URL("http://localhost:8080/swagger/doc.json"),
@@ -75,7 +79,7 @@ func (c *restServer) addSchedule(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	response := responseScheduleID{Schedule_id: strconv.Itoa(scheduleID)}
-	return writeJSONtoHTTP(w, http.StatusCreated, response)
+	return sendJSONtoHTTP(w, http.StatusCreated, response)
 }
 
 // @Summary Get user schedules
@@ -91,10 +95,10 @@ func (c *restServer) addSchedule(w http.ResponseWriter, r *http.Request) error {
 func (c *restServer) getScheduleIDs(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
-		return writeJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect user_id: %w", err))
+		return sendJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect user_id: %w", err))
 	}
 	if userID == 0 {
-		return writeJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("user_id can't be 0: %w", err))
+		return sendJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("user_id can't be 0: %w", err))
 	}
 
 	response, err := c.service.GetScheduleIDs(userID)
@@ -103,10 +107,10 @@ func (c *restServer) getScheduleIDs(w http.ResponseWriter, r *http.Request) erro
 	}
 
 	if len(response) == 0 {
-		return writeJSONtoHTTP(w, http.StatusNoContent, response)
+		return sendJSONtoHTTP(w, http.StatusNoContent, response)
 	}
 
-	return writeJSONtoHTTP(w, http.StatusOK, response)
+	return sendJSONtoHTTP(w, http.StatusOK, response)
 }
 
 // @Summary Get a specific schedule
@@ -123,12 +127,12 @@ func (c *restServer) getScheduleIDs(w http.ResponseWriter, r *http.Request) erro
 func (c *restServer) getSchedule(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
-		return writeJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect user_id: %w", err))
+		return sendJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect user_id: %w", err))
 	}
 
 	scheduleID, err := strconv.Atoi(r.URL.Query().Get("schedule_id"))
 	if err != nil {
-		return writeJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect schedule_id: %w", err))
+		return sendJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect schedule_id: %w", err))
 	}
 
 	response, err := c.service.GetScheduleWithIntake(userID, scheduleID)
@@ -137,10 +141,10 @@ func (c *restServer) getSchedule(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if response.ID == 0 {
-		return writeJSONtoHTTP(w, http.StatusNoContent, Schedule(response))
+		return sendJSONtoHTTP(w, http.StatusNoContent, Schedule(response))
 	}
 
-	return writeJSONtoHTTP(w, http.StatusOK, Schedule(response))
+	return sendJSONtoHTTP(w, http.StatusOK, Schedule(response))
 }
 
 // @Summary Get next scheduled takings
@@ -156,7 +160,7 @@ func (c *restServer) getSchedule(w http.ResponseWriter, r *http.Request) error {
 func (c *restServer) getNextTakings(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
-		return writeJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect user_id: %w", err))
+		return sendJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect user_id: %w", err))
 	}
 
 	schedules, err := c.service.GetNextTakings(userID)
@@ -165,11 +169,11 @@ func (c *restServer) getNextTakings(w http.ResponseWriter, r *http.Request) erro
 	}
 
 	if len(schedules) == 0 {
-		return writeJSONtoHTTP(w, http.StatusNoContent, schedules)
+		return sendJSONtoHTTP(w, http.StatusNoContent, schedules)
 	}
 
 	response := SchedulesInWindow{Schedules: fromModelSchedule(schedules)}
-	return writeJSONtoHTTP(w, http.StatusOK, response)
+	return sendJSONtoHTTP(w, http.StatusOK, response)
 }
 
 func fromModelSchedule(schedules []model.Schedule) []Schedule {

@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
@@ -35,7 +34,7 @@ func LoggerMiddleware(log *slog.Logger) func(next http.Handler) http.Handler {
 				slog.String("trace_id", traceID),
 				slog.String("method", r.Method),
 				slog.String("url", r.URL.Path),
-				slog.String("query", r.URL.RawQuery),
+				slog.String("query", sanitizeQuery(r.URL.Query())),
 				slog.Any("headers", headers),
 				slog.String("remote_addr", r.RemoteAddr),
 				slog.String("client_ip", r.RemoteAddr),
@@ -90,15 +89,4 @@ func sendJSONtoHTTP(w http.ResponseWriter, code int, v any) error {
 		return json.NewEncoder(w).Encode(v)
 	}
 	return nil
-}
-
-func sanitizeHeaders(headers http.Header) map[string]string {
-	safe := make(map[string]string)
-	for k, v := range headers {
-		if strings.EqualFold(k, "user_id") {
-			continue
-		}
-		safe[k] = strings.Join(v, ", ")
-	}
-	return safe
 }
