@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/infinity-ocean/ikakbolit/internal/model"
+	"github.com/infinity-ocean/ikakbolit/internal/dto"
 )
 
-func LoggerMiddleware(log *slog.Logger) func(next http.Handler) http.Handler {
+func loggerMiddleware(log *slog.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		log := log.With(
 			slog.String("component", "middleware/logger"),
@@ -65,28 +65,23 @@ func httpWrapper(f handlerWithError) http.HandlerFunc {
 			return
 		}
 		switch {
-		case errors.Is(err, model.ErrNoContent):
-			sendJSONtoHTTP(w, http.StatusNoContent, APIError{Message: err.Error()})
-		case errors.Is(err, model.ErrBadRequest):
-			sendJSONtoHTTP(w, http.StatusBadRequest, APIError{Message: err.Error()})
-		case errors.Is(err, model.ErrNotFound):
-			sendJSONtoHTTP(w, http.StatusNotFound, APIError{Message: err.Error()})
-		case errors.Is(err, model.ErrMethodNotAllowed):
-			sendJSONtoHTTP(w, http.StatusMethodNotAllowed, APIError{Message: err.Error()})
-		case errors.Is(err, model.ErrInternalServerError):
-			sendJSONtoHTTP(w, http.StatusInternalServerError, APIError{Message: err.Error()})
+		case errors.Is(err, dto.ErrNotFound):
+			sendJSONtoHTTP(w, http.StatusNotFound, APIError{Message: "resource not found"})
+		case errors.Is(err, dto.ErrBadRequest):
+			sendJSONtoHTTP(w, http.StatusBadRequest, APIError{Message: "invalid input data"})
 		default:
-			sendJSONtoHTTP(w, http.StatusInternalServerError, APIError{Message: err.Error()})
+			sendJSONtoHTTP(w, http.StatusInternalServerError, APIError{Message: "internal server error"})
 		}
 	})
 }	
 
 func sendJSONtoHTTP(w http.ResponseWriter, code int, v any) error {
+	if code == http.StatusNoContent {
+		w.WriteHeader(code)
+		return nil
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-
-	if code != http.StatusNoContent {
-		return json.NewEncoder(w).Encode(v)
-	}
-	return nil
+	return json.NewEncoder(w).Encode(v)
 }

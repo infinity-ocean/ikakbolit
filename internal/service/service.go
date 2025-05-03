@@ -1,12 +1,16 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
 	"time"
 
+	"github.com/infinity-ocean/ikakbolit/internal/dto"
 	"github.com/infinity-ocean/ikakbolit/internal/model"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type service struct {
@@ -24,37 +28,45 @@ func New(repo repo) *service {
 }
 
 func (s *service) AddSchedule(schedule model.Schedule) (int, error) {
-	if schedule.DosesPerDay < 1 || schedule.DosesPerDay > 24 {
-		return 0, fmt.Errorf("doses per day must be between 1 and 24: %w", model.ErrBadRequest)
+	if schedule.DosesPerDay < 1 || schedule.DosesPerDay > 12 {
+		return 0, fmt.Errorf("doses per day must be between 1 and 12: %w", dto.ErrBadRequest)
 	}
-	return s.repo.InsertSchedule(schedule)
+
+	id, err := s.repo.InsertSchedule(schedule)
+	if err != nil {
+		return 0, MapSQLErrorToDTO(err)
+	}
+
+	return id, nil 
 }
 
 func (s *service) GetScheduleIDs(userID int) ([]int, error) {
 	schedules, err := s.repo.SelectSchedules(userID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get schedule IDs: %w", err)
+		return nil, MapSQLErrorToDTO(err)
 	}
+	
 	idSlice := make([]int, 0, len(schedules))
 	for _, schedule := range schedules {
 		idSlice = append(idSlice, schedule.ID)
 	}
+	
 	return idSlice, nil
 }
 
 func (s *service) GetScheduleWithIntake(userID int, scheduleID int) (model.Schedule, error) {
 	schedule, err := s.repo.SelectSchedule(userID, scheduleID)
 	if err != nil {
-		return model.Schedule{}, fmt.Errorf("failed to get schedule: %w", err)
+		return model.Schedule{}, MapSQLErrorToDTO(err)
 	}
 
 	if schedule.ID == 0 {
-		return model.Schedule{}, fmt.Errorf("no schedule for user %d with scheduleID %d: %w", userID, scheduleID, model.ErrNoContent)
+		return model.Schedule{}, fmt.Errorf("schedule_id is 0: %w", dto.ErrBadRequest)
 	}
 
 	intakes, err := CalculateIntakeTimes(schedule.DosesPerDay)
 	if err != nil {
-		return model.Schedule{}, fmt.Errorf("incorrect .env DAY_START or DAY_FINISH: %w", model.ErrInternalServerError)
+		return model.Schedule{}, fmt.Errorf("error in schedule calculating: %w", err)
 	}
 	schedule.Intakes = intakes
 	return schedule, nil
@@ -63,16 +75,16 @@ func (s *service) GetScheduleWithIntake(userID int, scheduleID int) (model.Sched
 func (s *service) GetNextTakings(userID int) ([]model.Schedule, error) {
 	schedules, err := s.repo.SelectSchedules(userID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get schedules: %w", err)
+		return nil, MapSQLErrorToDTO(err)
 	}
 
 	if len(schedules) == 0 {
-		return nil, fmt.Errorf("no schedules for user %d: %w", userID, model.ErrNoContent)
+		return nil, fmt.Errorf("no schedules for user %d: %w", userID, dto.ErrNotFound)
 	}
 
 	window, err := strconv.Atoi(os.Getenv("CURE_SCHEDULE_WINDOW_MIN"))
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse CURE_SCHEDULE_WINDOW_MIN: %w", model.ErrInternalServerError)
+		return nil, fmt.Errorf("env CURE_SCHEDULE_WINDOW_MIN is not int: %w", err)
 	}
 	windowDuration := time.Duration(window) * time.Minute
 
@@ -87,14 +99,14 @@ func (s *service) GetNextTakings(userID int) ([]model.Schedule, error) {
 
 		times, err := CalculateIntakeTimes(schedule.DosesPerDay)
 		if err != nil {
-			return nil, fmt.Errorf("incorrect .env DAY_START or DAY_FINISH: %w", model.ErrInternalServerError)
+			return nil, fmt.Errorf("incorrect .env DAY_START or DAY_FINISH: %w", err)
 		}
 		schedule.Intakes = times
 
 		for _, timeStr := range times {
 			intakeTime, err := time.ParseInLocation("15:04", timeStr, now.Location())
 			if err != nil {
-				return nil, fmt.Errorf("failed to parse intake time %s: %w", timeStr, model.ErrInternalServerError)
+				return nil, fmt.Errorf("failed to parse intake time %s: %w", timeStr, err)
 			}
 
 			intakeTime = time.Date(now.Year(), now.Month(), now.Day(), intakeTime.Hour(), intakeTime.Minute(), 0, 0, now.Location())
@@ -145,4 +157,24 @@ func CalculateIntakeTimes(dosesPerDay int) ([]string, error) {
 	}
 
 	return intakes, nil
+}
+
+func MapSQLErrorToDTO(err error) error {
+    if err == nil {
+        return nil
+    }
+
+    if errors.Is(err, pgx.ErrNoRows) {
+        return fmt.Errorf("%w: %v", dto.ErrNotFound, err)
+    }
+
+    var pgErr *pgconn.PgError
+    if errors.As(err, &pgErr) {
+        switch pgErr.Code {
+        case "23502", "23503", "23505", "23514", "22001", "22002", "22003", "22P02", "22007", "42804":
+            return fmt.Errorf("%w: %s", dto.ErrBadRequest, pgErr.Message)
+        }
+    }
+
+    return err
 }

@@ -9,7 +9,7 @@ import (
 
 	"github.com/infinity-ocean/ikakbolit/internal/controller"
 	"github.com/infinity-ocean/ikakbolit/internal/logger"
-	"github.com/infinity-ocean/ikakbolit/internal/repo"
+	"github.com/infinity-ocean/ikakbolit/internal/repository"
 	"github.com/infinity-ocean/ikakbolit/internal/service"
 	"github.com/joho/godotenv"
 )
@@ -32,14 +32,14 @@ func main() {
 	log := logger.MustInitLogger()
 	log.Info("Program is starting...")
 
-	pool, err := repo.MakePool()
+	pool, err := repository.MakePool()
 	if err != nil {
 		log.Error("Failed to create database pool:", "err", err)
 		os.Exit(1)
 	}
 
-	repository := repo.New(pool)
-	svc := service.New(repository)
+	repo := repository.New(pool)
+	svc := service.New(repo)
 
 	grpcCtrl := controller.NewGRPCServer(svc, ":50051")
 	restCtrl := controller.NewRestServer(svc, ":8080", log)

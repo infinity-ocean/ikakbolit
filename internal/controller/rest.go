@@ -7,10 +7,12 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/infinity-ocean/ikakbolit/internal/model"
 	_ "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/docs"
+	"github.com/infinity-ocean/ikakbolit/internal/dto"
+	"github.com/infinity-ocean/ikakbolit/internal/model"
 	swagger "github.com/swaggo/http-swagger"
 )
 
@@ -35,7 +37,7 @@ func (c *restServer) Run() error {
 	router := chi.NewRouter()
 
 	router.Use(middleware.RequestID)
-	router.Use(LoggerMiddleware(c.logger))
+	router.Use(loggerMiddleware(c.logger))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
@@ -68,7 +70,7 @@ func (c *restServer) Run() error {
 func (c *restServer) addSchedule(w http.ResponseWriter, r *http.Request) error {
 	schedule := Schedule{}
 	if err := json.NewDecoder(r.Body).Decode(&schedule); err != nil {
-		return fmt.Errorf("incorrect input: %w.\ninternal error: %s", model.ErrBadRequest, err)
+		return fmt.Errorf("failed to parse schedule into json: %w", err)
 	}
 
 	scheduleModel := toModelSchedule(schedule)
@@ -94,10 +96,10 @@ func (c *restServer) addSchedule(w http.ResponseWriter, r *http.Request) error {
 func (c *restServer) getScheduleIDs(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
-		return sendJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect user_id: %w", err))
+		return fmt.Errorf("invalid user_id: %v; %w", err, dto.ErrBadRequest)
 	}
 	if userID == 0 {
-		return sendJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("user_id can't be 0: %w", err))
+		return fmt.Errorf("user_id can't be 0: %w", dto.ErrBadRequest)
 	}
 
 	response, err := c.service.GetScheduleIDs(userID)
@@ -126,21 +128,17 @@ func (c *restServer) getScheduleIDs(w http.ResponseWriter, r *http.Request) erro
 func (c *restServer) getSchedule(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
-		return sendJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect user_id: %w", err))
+		return fmt.Errorf("invalid user_id: %v; %w", err, dto.ErrBadRequest)
 	}
 
 	scheduleID, err := strconv.Atoi(r.URL.Query().Get("schedule_id"))
 	if err != nil {
-		return sendJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect schedule_id: %w", err))
+		return fmt.Errorf("invalid schedule_id: %v; %w", err, dto.ErrBadRequest)
 	}
 
 	response, err := c.service.GetScheduleWithIntake(userID, scheduleID)
 	if err != nil {
 		return err
-	}
-
-	if response.ID == 0 {
-		return sendJSONtoHTTP(w, http.StatusNoContent, Schedule(response))
 	}
 
 	return sendJSONtoHTTP(w, http.StatusOK, Schedule(response))
@@ -159,7 +157,7 @@ func (c *restServer) getSchedule(w http.ResponseWriter, r *http.Request) error {
 func (c *restServer) getNextTakings(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
-		return sendJSONtoHTTP(w, http.StatusBadRequest, fmt.Errorf("incorrect user_id: %w", err))
+		return fmt.Errorf("invalid user_id: %v; %w", err, dto.ErrBadRequest)
 	}
 
 	schedules, err := c.service.GetNextTakings(userID)

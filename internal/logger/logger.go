@@ -38,8 +38,6 @@ func NewLogger() (*slog.Logger, error) {
 	switch levelStr {
 	case "ERROR":
 		level = slog.LevelError
-	case "DEBUG":
-		level = slog.LevelDebug
 	default:
 		level = slog.LevelInfo
 	}
