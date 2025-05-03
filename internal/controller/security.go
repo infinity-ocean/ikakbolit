@@ -6,11 +6,11 @@ import (
 	"strings"
 )
 
-var SensitiveQueryParams = map[string]struct{}{
+var sensitiveQueryParams = map[string]struct{}{
 	"user_id": {},
 }
 
-var SensitiveHeaders = map[string]struct{}{
+var sensitiveHeaders = map[string]struct{}{
 	"authorization":       {},
 	"proxy-authorization": {},
 	"cookie":              {},
@@ -28,7 +28,7 @@ var SensitiveHeaders = map[string]struct{}{
 func sanitizeQuery(values url.Values) string {
 	safe := url.Values{}
 	for key, val := range values {
-		if _, bad := SensitiveQueryParams[strings.ToLower(key)]; bad {
+		if _, bad := sensitiveQueryParams[strings.ToLower(key)]; bad {
 			continue
 		}
 		safe[key] = val
@@ -39,7 +39,7 @@ func sanitizeQuery(values url.Values) string {
 func sanitizeHeaders(headers http.Header) map[string]string {
 	safe := make(map[string]string, len(headers))
 	for k, vals := range headers {
-		if _, bad := SensitiveHeaders[strings.ToLower(k)]; bad {
+		if _, bad := sensitiveHeaders[strings.ToLower(k)]; bad {
 			continue
 		}
 		safe[k] = strings.Join(vals, ", ")

@@ -35,7 +35,6 @@ func (c *restServer) Run() error {
 	router := chi.NewRouter()
 
 	router.Use(middleware.RequestID)
-	router.Use(middleware.Logger)
 	router.Use(LoggerMiddleware(c.logger))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
