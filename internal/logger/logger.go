@@ -22,29 +22,30 @@ func MustInitLogger() *slog.Logger {
 }
 
 func NewLogger() (*slog.Logger, error) {
-	file, err := os.OpenFile(
-		os.Getenv("LOGGING_FILE_PATH"),
-		os.O_CREATE|os.O_APPEND|os.O_WRONLY,
-        0o644)
-	if err != nil {
-		return nil, err
+	var w io.Writer
+
+	if os.Getenv("DEBUG") == "false" {
+		file, err := os.OpenFile(
+			os.Getenv("LOGGING_FILE_PATH"),
+			os.O_CREATE|os.O_APPEND|os.O_WRONLY,
+			0o644)
+		if err != nil {
+			return nil, err
+		}
+		w = io.MultiWriter(os.Stdout, file)
 	}
 
-	mw := io.MultiWriter(os.Stdout, file)
-
 	var level slog.Level
-	levelStr := os.Getenv("LOGGING_LEVEL")
-
-	switch levelStr {
-	case "DEBUG":
+	switch os.Getenv("LOGGING_LEVEL") {
+	case "debug":
 		level = slog.LevelDebug
-	case "ERROR":
+	case "error":
 		level = slog.LevelError
 	default:
 		level = slog.LevelInfo
 	}
 
-	handler := slog.NewJSONHandler(mw, &slog.HandlerOptions{
+	handler := slog.NewJSONHandler(w, &slog.HandlerOptions{
 		Level: level,
 	})
 
