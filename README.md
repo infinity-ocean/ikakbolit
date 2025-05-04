@@ -43,16 +43,20 @@ cd ikakbolit
 Создай `.env` файл и укажи необходимые настройки для подключения к базе данных:
 
 ```ini
-POSTGRES_HOST=localhost       # Хост базы данных
-POSTGRES_PORT=5432            # Порт подключения к PostgreSQL
-POSTGRES_USER=postgres        # Имя пользователя БД
-POSTGRES_PASSWORD=12345       # Пароль пользователя БД
-POSTGRES_DB=postgres          # Имя базы данных
-POSTGRES_SSL=disable          # Отключение SSL (для локальной разработки)
+DEBUG=false # true for debugger mode in local
 
-DAY_START=08:00               # Время начала дня (ЧЧ:ММ, 24-часовой формат)
-DAY_FINISH=21:45              # Время окончания дня
-CURE_SCHEDULE_WINDOW_MIN=180  # Период отображения расписаний (в минутах)
+CURE_SCHEDULE_WINDOW_MIN=180
+
+LOGGING_FILE_PATH="logs/ikakbolit.log"
+LOGGING_LEVEL=debug # info and debug available
+
+POSTGRES_HOST=localhost
+POSTGRES_DB=postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=12345
+POSTGRES_PORT=5432
+POSTGRES_SSL=disable
+POSTGRES_DSN=host=${POSTGRES_HOST} port=${POSTGRES_PORT} dbname=${POSTGRES_DB} user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} sslmode=disable
 ```
 
 ### 3️⃣ Установка зависимостей
