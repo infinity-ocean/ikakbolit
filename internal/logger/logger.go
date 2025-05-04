@@ -36,6 +36,8 @@ func NewLogger() (*slog.Logger, error) {
 	levelStr := os.Getenv("LOGGING_LEVEL")
 
 	switch levelStr {
+	case "DEBUG":
+		level = slog.LevelDebug
 	case "ERROR":
 		level = slog.LevelError
 	default:
