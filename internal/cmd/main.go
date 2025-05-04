@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -26,10 +27,17 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Failed to load .env: %v", err)
+		if err := godotenv.Load("../../.env"); err != nil{
+			log.Fatalf("Failed to load .env: %v", err)
+		}
 	}
 
 	log := logger.MustInitLogger()
+	if os.Getenv("DEBUG") == "true" {
+		log = slog.Default()
+		log.Info("Running in DEBUG mode")
+	}
+	
 	log.Info("Program is starting...")
 
 	pool, err := repository.MakePool()
@@ -39,7 +47,7 @@ func main() {
 	}
 
 	repo := repository.New(pool)
-	svc := service.New(repo)
+	svc := service.New(repo, log)
 
 	grpcCtrl := controller.NewGRPCServer(svc, ":50051")
 	restCtrl := controller.NewRestServer(svc, ":8080", log)
