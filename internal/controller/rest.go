@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -19,25 +20,25 @@ import (
 type restServer struct {
 	service    service
 	listenPort string
-	logger     *slog.Logger
+	log     *slog.Logger
 }
 
 type service interface {
-	AddSchedule(model.Schedule) (int, error)
-	GetScheduleIDs(int) ([]int, error)
-	GetScheduleWithIntake(int, int) (model.Schedule, error)
-	GetNextTakings(int) ([]model.Schedule, error)
+	AddSchedule(context.Context, model.Schedule) (int, error)
+	GetScheduleIDs(context.Context, int) ([]int, error)
+	GetScheduleWithIntake(context.Context, int, int) (model.Schedule, error)
+	GetNextTakings(context.Context, int) ([]model.Schedule, error)
 }
 
 func NewRestServer(svc service, port string, log *slog.Logger) *restServer {
-	return &restServer{service: svc, listenPort: port, logger: log}
+	return &restServer{service: svc, listenPort: port, log: log}
 }
 
 func (c *restServer) Run() error {
 	router := chi.NewRouter()
 
 	router.Use(middleware.RequestID)
-	router.Use(loggerMiddleware(c.logger))
+	router.Use(loggerMiddleware(c.log))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
@@ -74,7 +75,7 @@ func (c *restServer) addSchedule(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	scheduleModel := toModelSchedule(schedule)
-	scheduleID, err := c.service.AddSchedule(scheduleModel)
+	scheduleID, err := c.service.AddSchedule(r.Context(), scheduleModel)
 	if err != nil {
 		return err
 	}
@@ -102,7 +103,7 @@ func (c *restServer) getScheduleIDs(w http.ResponseWriter, r *http.Request) erro
 		return fmt.Errorf("user_id can't be 0: %w", dto.ErrBadRequest)
 	}
 
-	response, err := c.service.GetScheduleIDs(userID)
+	response, err := c.service.GetScheduleIDs(r.Context(), userID)
 	if err != nil {
 		return err
 	}
@@ -136,7 +137,7 @@ func (c *restServer) getSchedule(w http.ResponseWriter, r *http.Request) error {
 		return fmt.Errorf("invalid schedule_id: %v; %w", err, dto.ErrBadRequest)
 	}
 
-	response, err := c.service.GetScheduleWithIntake(userID, scheduleID)
+	response, err := c.service.GetScheduleWithIntake(r.Context(), userID, scheduleID)
 	if err != nil {
 		return err
 	}
@@ -160,7 +161,7 @@ func (c *restServer) getNextTakings(w http.ResponseWriter, r *http.Request) erro
 		return fmt.Errorf("invalid user_id: %v; %w", err, dto.ErrBadRequest)
 	}
 
-	schedules, err := c.service.GetNextTakings(userID)
+	schedules, err := c.service.GetNextTakings(r.Context(), userID)
 	if err != nil {
 		return err
 	}

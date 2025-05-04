@@ -11,20 +11,13 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type IkakbolitService interface {
-    AddSchedule(model.Schedule) (int, error)
-    GetScheduleIDs(int) ([]int, error)
-    GetScheduleWithIntake(int, int) (model.Schedule, error)
-    GetNextTakings(int) ([]model.Schedule, error)
-}
-
 type gRPCServer struct {
     pb.UnimplementedIkakbolitServiceServer
-    svc IkakbolitService
+    svc service
     port string
 }
 
-func NewGRPCServer(svc IkakbolitService, port string) *gRPCServer {
+func NewGRPCServer(svc service, port string) *gRPCServer {
     return &gRPCServer{svc: svc, port: port}
 }
 
@@ -48,7 +41,7 @@ func (s *gRPCServer) AddSchedule(ctx context.Context, req *pb.RequestSchedule) (
         DosesPerDay:  int(req.DosesPerDay),
         DurationDays: int(req.DurationDays),
     }
-    id, err := s.svc.AddSchedule(schedule)
+    id, err := s.svc.AddSchedule(ctx, schedule)
     if err != nil {
         return nil, err
     }
@@ -56,7 +49,7 @@ func (s *gRPCServer) AddSchedule(ctx context.Context, req *pb.RequestSchedule) (
 }
 
 func (s *gRPCServer) GetScheduleIDs(ctx context.Context, req *pb.RequestUserID) (*pb.ResponseScheduleIDs, error) {
-    ids, err := s.svc.GetScheduleIDs(int(req.UserId))
+    ids, err := s.svc.GetScheduleIDs(ctx, int(req.UserId))
     if err != nil {
         return nil, err
     }
@@ -68,7 +61,7 @@ func (s *gRPCServer) GetScheduleIDs(ctx context.Context, req *pb.RequestUserID) 
 }
 
 func (s *gRPCServer) GetSchedule(ctx context.Context, req *pb.RequestUserIDScheduleID) (*pb.ResponseSchedule, error) {
-    sched, err := s.svc.GetScheduleWithIntake(int(req.UserId), int(req.ScheduleId))
+    sched, err := s.svc.GetScheduleWithIntake(ctx, int(req.UserId), int(req.ScheduleId))
     if err != nil {
         return nil, err
     }
@@ -84,7 +77,7 @@ func (s *gRPCServer) GetSchedule(ctx context.Context, req *pb.RequestUserIDSched
 }
 
 func (s *gRPCServer) GetNextTakings(ctx context.Context, req *pb.RequestNextTakings) (*pb.ResponseNextTakings, error) {
-    schedules, err := s.svc.GetNextTakings(int(req.UserId))
+    schedules, err := s.svc.GetNextTakings(ctx, int(req.UserId))
     if err != nil {
         return nil, err
     }
