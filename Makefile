@@ -4,7 +4,7 @@ export
 # Директория, в которой хранятся исполняемые
 # файлы проекта и зависимости, необходимые для сборки.
 LOCAL_BIN := $(CURDIR)/bin
-MIGRATIONS_DIR := ./migrations
+MIGRATIONS_DIR := ./db/migrations
 PROTO_SRC := 3-api-grpc-Homework/grpc/ikakbolit.proto
 PROTO_OUT := 3-api-grpc-Homework/grpc/ikakbolit
 
@@ -14,7 +14,7 @@ start-infra:
 stop-infra:
 	docker-compose down
 	
-# ДЗ №3 кодогенерация на основе openapi 
+# кодогенерация на основе openapi 
 swagger-gen:
 	swagger generate server -f internal/3-api-grpc-Homework/docs/swagger.yaml -A ikakbolit --target internal/3-api-grpc-Homework/server
 
@@ -25,14 +25,14 @@ proto-gen:
 		--go-grpc_out=$(PROTO_OUT) --go-grpc_opt=paths=source_relative \
 		$(PROTO_SRC)
 	
-migration-up:
-	$(LOCAL_BIN)/goose $(opts) -allow-missing -dir $(MIGRATIONS_DIR) postgres "$(POSTGRES_DSN)" up
+goose-up:
+	goose $(opts) -allow-missing -dir $(MIGRATIONS_DIR) postgres "$(POSTGRES_DSN)" up
 
-migration-down:
-	$(LOCAL_BIN)/goose $(opts) -dir $(MIGRATIONS_DIR) postgres "$(POSTGRES_DSN)" down
+goose-down:
+	goose $(opts) -dir $(MIGRATIONS_DIR) postgres "$(POSTGRES_DSN)" down
 
 install-deps:
-	GOBIN=$(LOCAL_BIN) go install github.com/pressly/goose/v3/cmd/goose@v3.18.0
-	GOBIN=$(LOCAL_BIN) go install github.com/go-swagger/go-swagger/cmd/swagger@latest
-	GOBIN=$(LOCAL_BIN) go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-	GOBIN=$(LOCAL_BIN) go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	go install -tags='no_clickhouse no_libsql no_mssql no_mysql no_sqlite3 no_vertica no_ydb' github.com/pressly/goose/v3/cmd/goose@latest
+	go install github.com/go-swagger/go-swagger/cmd/swagger@latest
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
