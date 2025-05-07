@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/infinity-ocean/ikakbolit/internal/model"
+	"github.com/infinity-ocean/ikakbolit/internal/domain/entity"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -18,7 +18,7 @@ func New(pool *pgxpool.Pool) *repo {
 	return &repo{pool: pool}
 }
 
-func (r *repo) InsertSchedule(sched model.Schedule) (int, error) {
+func (r *repo) InsertSchedule(sched entity.Schedule) (int, error) {
 	ctx := context.Background()
 	conn, err := r.pool.Acquire(ctx)
 	if err != nil {
@@ -38,7 +38,7 @@ func (r *repo) InsertSchedule(sched model.Schedule) (int, error) {
 	return id, nil
 }
 
-func (r *repo) SelectSchedules(userID int) ([]model.Schedule, error) {
+func (r *repo) SelectSchedules(userID int) ([]entity.Schedule, error) {
 	conn, err := r.pool.Acquire(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("failed to accquire connection pool: %w", err)
@@ -56,9 +56,9 @@ func (r *repo) SelectSchedules(userID int) ([]model.Schedule, error) {
 	}
 	defer rows.Close()
 
-	var schedules []model.Schedule
+	var schedules []entity.Schedule
 	for rows.Next() {
-		var s model.Schedule
+		var s entity.Schedule
 		var duration int
 
 		if err := rows.Scan(&s.ID, &s.UserID, &s.CureName, &s.DosesPerDay, &duration, &s.CreatedAt); err != nil {
@@ -76,10 +76,10 @@ func (r *repo) SelectSchedules(userID int) ([]model.Schedule, error) {
 	return schedules, nil
 }
 
-func (r *repo) SelectSchedule(userID int, schedID int) (model.Schedule, error) {
+func (r *repo) SelectSchedule(userID int, schedID int) (entity.Schedule, error) {
 	conn, err := r.pool.Acquire(context.Background())
 	if err != nil {
-		return model.Schedule{}, fmt.Errorf("failed to accquire connection pool: %w", err)
+		return entity.Schedule{}, fmt.Errorf("failed to accquire connection pool: %w", err)
 	}
 	defer conn.Release()
 
@@ -89,7 +89,7 @@ func (r *repo) SelectSchedule(userID int, schedID int) (model.Schedule, error) {
 
 	row := conn.QueryRow(context.Background(), sql, userID, schedID)
 
-	var schedule model.Schedule
+	var schedule entity.Schedule
 	err = row.Scan(
 		&schedule.ID,
 		&schedule.UserID,
@@ -101,9 +101,9 @@ func (r *repo) SelectSchedule(userID int, schedID int) (model.Schedule, error) {
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return model.Schedule{}, fmt.Errorf("schedule not found: %w", err)
+			return entity.Schedule{}, fmt.Errorf("schedule not found: %w", err)
 		}
-		return model.Schedule{}, fmt.Errorf("failed to scan schedule: %w", err)
+		return entity.Schedule{}, fmt.Errorf("failed to scan schedule: %w", err)
 	}
 
 	return schedule, nil
