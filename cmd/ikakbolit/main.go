@@ -8,10 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/infinity-ocean/ikakbolit/internal/controller"
-	"github.com/infinity-ocean/ikakbolit/internal/logger"
+	"github.com/infinity-ocean/ikakbolit/internal/server"
+	"github.com/infinity-ocean/ikakbolit/pkg/application/connectors"
 	"github.com/infinity-ocean/ikakbolit/internal/repository"
-	"github.com/infinity-ocean/ikakbolit/internal/service"
+	"github.com/infinity-ocean/ikakbolit/internal/domain/service"
 	"github.com/joho/godotenv"
 )
 
@@ -32,7 +32,7 @@ func main() {
 		}
 	}
 
-	log := logger.MustInitLogger()
+	log := connectors.MustInitLogger()
 	if os.Getenv("DEBUG") == "true" {
 		log = slog.Default()
 		log.Info("Running in DEBUG mode")
@@ -49,8 +49,8 @@ func main() {
 	repo := repository.New(pool)
 	svc := service.New(repo, log)
 
-	grpcCtrl := controller.NewGRPCServer(svc, ":50051")
-	restCtrl := controller.NewRestServer(svc, ":8080", log)
+	grpcCtrl := server.NewGRPCServer(svc, ":50051")
+	restCtrl := server.NewHTTPServer(svc, ":8080", log)
 
 	go func() {
 		log.Info("Starting gRPC server on :50051")
