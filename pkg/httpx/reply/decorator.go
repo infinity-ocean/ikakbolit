@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/infinity-ocean/ikakbolit/internal/dto"
+	"github.com/infinity-ocean/ikakbolit/pkg/errcodes"
 	"github.com/infinity-ocean/ikakbolit/pkg/rest"
 )
 
@@ -15,9 +15,9 @@ func ErrorDecorator(f HandlerWithError) http.HandlerFunc {
 			return
 		}
 		switch {
-		case errors.Is(err, dto.ErrNotFound):
+		case errors.Is(err, errcodes.ErrNotFound):
 			JSON(w, http.StatusNotFound, rest.APIError{Message: "resource not found"})
-		case errors.Is(err, dto.ErrBadRequest):
+		case errors.Is(err, errcodes.ErrBadRequest):
 			JSON(w, http.StatusBadRequest, rest.APIError{Message: "invalid input data"})
 		default:
 			JSON(w, http.StatusInternalServerError, rest.APIError{Message: "internal server error"})

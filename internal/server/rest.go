@@ -12,7 +12,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/docs"
-	"github.com/infinity-ocean/ikakbolit/internal/dto"
+	"github.com/infinity-ocean/ikakbolit/pkg/errcodes"
 	"github.com/infinity-ocean/ikakbolit/internal/domain/entity"
 	"github.com/infinity-ocean/ikakbolit/pkg/rest"
 	swagger "github.com/swaggo/http-swagger"
@@ -100,10 +100,10 @@ func (c *HTTPServer) addSchedule(w http.ResponseWriter, r *http.Request) error {
 func (c *HTTPServer) getScheduleIDs(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
-		return fmt.Errorf("invalid user_id: %v; %w", err, dto.ErrBadRequest)
+		return fmt.Errorf("invalid user_id: %v; %w", err, errcodes.ErrBadRequest)
 	}
 	if userID == 0 {
-		return fmt.Errorf("user_id can't be 0: %w", dto.ErrBadRequest)
+		return fmt.Errorf("user_id can't be 0: %w", errcodes.ErrBadRequest)
 	}
 
 	response, err := c.service.GetScheduleIDs(r.Context(), userID)
@@ -132,12 +132,12 @@ func (c *HTTPServer) getScheduleIDs(w http.ResponseWriter, r *http.Request) erro
 func (c *HTTPServer) getSchedule(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
-		return fmt.Errorf("invalid user_id: %v; %w", err, dto.ErrBadRequest)
+		return fmt.Errorf("invalid user_id: %v; %w", err, errcodes.ErrBadRequest)
 	}
 
 	scheduleID, err := strconv.Atoi(r.URL.Query().Get("schedule_id"))
 	if err != nil {
-		return fmt.Errorf("invalid schedule_id: %v; %w", err, dto.ErrBadRequest)
+		return fmt.Errorf("invalid schedule_id: %v; %w", err, errcodes.ErrBadRequest)
 	}
 
 	response, err := c.service.GetScheduleWithIntake(r.Context(), userID, scheduleID)
@@ -161,7 +161,7 @@ func (c *HTTPServer) getSchedule(w http.ResponseWriter, r *http.Request) error {
 func (c *HTTPServer) getNextTakings(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
-		return fmt.Errorf("invalid user_id: %v; %w", err, dto.ErrBadRequest)
+		return fmt.Errorf("invalid user_id: %v; %w", err, errcodes.ErrBadRequest)
 	}
 
 	schedules, err := c.service.GetNextTakings(r.Context(), userID)
