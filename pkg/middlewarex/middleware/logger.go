@@ -1,14 +1,17 @@
-package middlewarex
+package middleware
 
 import (
 	"log/slog"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 	"github.com/go-chi/chi/v5/middleware"
 )
+
+type ctxKey string
+
+const requestIDKey ctxKey = "request_id"
 
 func LoggerMiddleware(log *slog.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -20,23 +23,18 @@ func LoggerMiddleware(log *slog.Logger) func(next http.Handler) http.Handler {
 
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			t1 := time.Now()
-			traceID := r.Header.Get("X-TRACE-ID")
-			if traceID == "" {
-				traceID = strconv.FormatInt(time.Now().UnixNano(), 36)
-			}
 
 			headers := sanitizeHeaders(r.Header)
 
 			req := log.With(
 				slog.Time("received_at", t1),
-				slog.String("trace_id", traceID),
 				slog.String("method", r.Method),
 				slog.String("url", r.URL.Path),
 				slog.String("query", sanitizeQuery(r.URL.Query())),
 				slog.Any("headers", headers),
 				slog.String("remote_addr", r.RemoteAddr),
 				slog.String("client_ip", r.RemoteAddr),
-				slog.String("request_id", middleware.GetReqID(r.Context())),
+				slog.String(string(requestIDKey), middleware.GetReqID(r.Context())),
 			)
 			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 
