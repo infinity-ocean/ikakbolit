@@ -2,18 +2,15 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/infinity-ocean/ikakbolit/internal/domain/entity"
+	"github.com/infinity-ocean/ikakbolit/internal/repository"
 	"github.com/infinity-ocean/ikakbolit/pkg/errcodes"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type service struct {
@@ -36,13 +33,13 @@ func (s *service) AddSchedule(ctx context.Context, schedule entity.Schedule) (in
 		return 0, fmt.Errorf("doses per day must be between 1 and 12: %w", errcodes.ErrBadRequest)
 	}
 
-	reqID := middleware.GetReqID(ctx)
+	reqID := GetReqID(ctx)
 	s.log.Info("starting to add schedule", "request_id", reqID, "user_id", schedule.UserID)
 
 	id, err := s.repo.InsertSchedule(schedule)
 	if err != nil {
 		s.log.Error("failed to insert schedule", "request_id", reqID, "error", err)
-		return 0, MapSQLError(err)
+		return 0, repository.MapSQLError(err)
 	}
 
 	s.log.Info("schedule added successfully", "request_id", reqID, "schedule_id", id)
@@ -50,13 +47,13 @@ func (s *service) AddSchedule(ctx context.Context, schedule entity.Schedule) (in
 }
 
 func (s *service) GetScheduleIDs(ctx context.Context, userID int) ([]int, error) {
-	reqID := middleware.GetReqID(ctx)
+	reqID := GetReqID(ctx)
 	s.log.Info("starting to get schedule IDs", "request_id", reqID, "user_id", userID)
 
 	schedules, err := s.repo.SelectSchedules(userID)
 	if err != nil {
 		s.log.Error("failed to select schedules", "request_id", reqID, "user_id", userID, "error", err)
-		return nil, MapSQLError(err)
+		return nil, repository.MapSQLError(err)
 	}
 
 	idSlice := make([]int, 0, len(schedules))
@@ -69,13 +66,13 @@ func (s *service) GetScheduleIDs(ctx context.Context, userID int) ([]int, error)
 }
 
 func (s *service) GetScheduleWithIntake(ctx context.Context, userID int, scheduleID int) (entity.Schedule, error) {
-	reqID := middleware.GetReqID(ctx)
+	reqID := GetReqID(ctx)
 	s.log.Info("starting to get schedule with intake", "request_id", reqID, "user_id", userID, "schedule_id", scheduleID)
 
 	schedule, err := s.repo.SelectSchedule(userID, scheduleID)
 	if err != nil {
 		s.log.Error("failed to select schedule", "request_id", reqID, "user_id", userID, "schedule_id", scheduleID, "error", err)
-		return entity.Schedule{}, MapSQLError(err)
+		return entity.Schedule{}, repository.MapSQLError(err)
 	}
 
 	if schedule.ID == 0 {
@@ -95,13 +92,13 @@ func (s *service) GetScheduleWithIntake(ctx context.Context, userID int, schedul
 }
 
 func (s *service) GetNextTakings(ctx context.Context, userID int) ([]entity.Schedule, error) {
-	reqID := middleware.GetReqID(ctx)
+	reqID := GetReqID(ctx)
 	s.log.Info("starting to compute next takings", "request_id", reqID, "user_id", userID)
 
 	schedules, err := s.repo.SelectSchedules(userID)
 	if err != nil {
 		s.log.Error("failed to select schedules", "request_id", reqID, "user_id", userID, "error", err)
-		return nil, MapSQLError(err)
+		return nil, repository.MapSQLError(err)
 	}
 	if len(schedules) == 0 {
 		s.log.Info("no schedules found for user", "request_id", reqID, "user_id", userID)
@@ -154,7 +151,7 @@ func (s *service) GetNextTakings(ctx context.Context, userID int) ([]entity.Sche
 }
 
 func (s *service) CalculateIntakeTimes(ctx context.Context, dosesPerDay int) ([]string, error) {
-	reqID := middleware.GetReqID(ctx)
+	reqID := GetReqID(ctx)
 	s.log.Info("Starting calculation of intake times", "request_id", reqID, "doses_per_day", dosesPerDay)
 
 	dayStartStr := "08:00"
@@ -210,22 +207,13 @@ func (s *service) CalculateIntakeTimes(ctx context.Context, dosesPerDay int) ([]
 	return intakes, nil
 }
 
-func MapSQLError(err error) error {
-	if err == nil {
-		return nil
-	}
 
-	if errors.Is(err, pgx.ErrNoRows) {
-		return fmt.Errorf("%w: %v", errcodes.ErrNotFound, err)
-	}
 
-	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) {
-		switch pgErr.Code {
-		case "23502", "23503", "23505", "23514", "22001", "22002", "22003", "22P02", "22007", "42804":
-			return fmt.Errorf("%w: %s", errcodes.ErrBadRequest, pgErr.Message)
-		}
-	}
+func GetReqID(ctx context.Context) string {
+	RequestIDKey := 0
 
-	return err
+	if reqID, ok := ctx.Value(RequestIDKey).(string); ok {
+		return reqID
+	}
+	return ""
 }
