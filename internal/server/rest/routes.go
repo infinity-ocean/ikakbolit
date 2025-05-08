@@ -1,4 +1,4 @@
-package server
+package rest
 
 import (
 	"context"
@@ -12,12 +12,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/docs"
-	"github.com/infinity-ocean/ikakbolit/pkg/errcodes"
 	"github.com/infinity-ocean/ikakbolit/internal/domain/entity"
+	mdw "github.com/infinity-ocean/ikakbolit/pkg/middlewarex/middleware"
+	"github.com/infinity-ocean/ikakbolit/pkg/errcodes"
+	"github.com/infinity-ocean/ikakbolit/pkg/httpx/reply"
 	"github.com/infinity-ocean/ikakbolit/pkg/rest"
 	swagger "github.com/swaggo/http-swagger"
-	"github.com/infinity-ocean/ikakbolit/pkg/httpx/reply"
-	"github.com/infinity-ocean/ikakbolit/pkg/middlewarex"
 )
 
 type HTTPServer struct {
@@ -41,7 +41,7 @@ func (c *HTTPServer) Run() error {
 	router := chi.NewRouter()
 
 	router.Use(middleware.RequestID)
-	router.Use(middlewarex.LoggerMiddleware(c.log))
+	router.Use(mdw.LoggerMiddleware(c.log))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 

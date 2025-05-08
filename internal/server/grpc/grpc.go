@@ -1,24 +1,37 @@
-package server
+package grpc
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"net"
 
 	pb "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/grpc/ikakbolit"
 	"github.com/infinity-ocean/ikakbolit/internal/domain/entity"
+	"github.com/infinity-ocean/ikakbolit/pkg/middlewarex/interceptor"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type gRPCServer struct {
-    pb.UnimplementedIkakbolitServiceServer
-    svc service
-    port string
+	pb.UnimplementedIkakbolitServiceServer
+	svc  service
+	port string
+	log  *slog.Logger
 }
 
-func NewGRPCServer(svc service, port string) *gRPCServer {
-    return &gRPCServer{svc: svc, port: port}
+type service interface {
+	AddSchedule(context.Context, entity.Schedule) (int, error)
+	GetScheduleIDs(context.Context, int) ([]int, error)
+	GetScheduleWithIntake(context.Context, int, int) (entity.Schedule, error)
+	GetNextTakings(context.Context, int) ([]entity.Schedule, error)
+}
+
+func NewGRPCServer(svc service, port string, logger *slog.Logger) *gRPCServer {
+	return &gRPCServer{
+		svc:  svc,
+		port: port,
+		log:  logger,
+	}
 }
 
 func (s *gRPCServer) Run() error {
@@ -27,10 +40,13 @@ func (s *gRPCServer) Run() error {
 		return err
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(interceptor.UnaryLoggingInterceptor(s.log)),
+	)
+
 	pb.RegisterIkakbolitServiceServer(grpcServer, s)
 
-	log.Println("Starting gRPC server on", s.port)
+	s.log.Info("starting gRPC server", slog.String("port", s.port))
 	return grpcServer.Serve(lis)
 }
 
