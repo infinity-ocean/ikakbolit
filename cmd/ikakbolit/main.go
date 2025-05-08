@@ -8,7 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/infinity-ocean/ikakbolit/internal/server"
+	"github.com/infinity-ocean/ikakbolit/internal/server/grpc"
+	"github.com/infinity-ocean/ikakbolit/internal/server/rest"
 	"github.com/infinity-ocean/ikakbolit/pkg/application/connectors"
 	"github.com/infinity-ocean/ikakbolit/internal/repository"
 	"github.com/infinity-ocean/ikakbolit/internal/domain/service"
@@ -49,8 +50,8 @@ func main() {
 	repo := repository.New(pool)
 	svc := service.New(repo, log)
 
-	grpcCtrl := server.NewGRPCServer(svc, ":50051")
-	restCtrl := server.NewHTTPServer(svc, ":8080", log)
+	grpcCtrl := grpc.NewGRPCServer(svc, ":50051", log)
+	restCtrl := rest.NewHTTPServer(svc, ":8080", log)
 
 	go func() {
 		log.Info("Starting gRPC server on :50051")
