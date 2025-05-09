@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -13,17 +12,17 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/docs"
 	"github.com/infinity-ocean/ikakbolit/internal/domain/entity"
-	mdw "github.com/infinity-ocean/ikakbolit/pkg/middlewarex/middleware"
 	"github.com/infinity-ocean/ikakbolit/pkg/errcodes"
 	"github.com/infinity-ocean/ikakbolit/pkg/httpx/reply"
+	mdw "github.com/infinity-ocean/ikakbolit/pkg/middlewarex/middleware"
 	"github.com/infinity-ocean/ikakbolit/pkg/rest"
 	swagger "github.com/swaggo/http-swagger"
 )
 
-type HTTPServer struct {
+type HTTPRouter struct {
 	service    service
-	listenPort string
-	log     *slog.Logger
+	ListenPort string
+	log        *slog.Logger
 }
 
 type service interface {
@@ -33,12 +32,12 @@ type service interface {
 	GetNextTakings(context.Context, int) ([]entity.Schedule, error)
 }
 
-func NewHTTPServer(svc service, port int, log *slog.Logger) *HTTPServer {
-	portStr := ":" + strconv.Itoa(port)
-	return &HTTPServer{service: svc, listenPort: portStr, log: log}
+func NewHTTPRouter(svc service, port string, log *slog.Logger) *HTTPRouter {
+	portStr := ":" + port
+	return &HTTPRouter{service: svc, ListenPort: portStr, log: log}
 }
 
-func (c *HTTPServer) Run() error {
+func (c *HTTPRouter) GetRouter() *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Use(middleware.RequestID)
@@ -58,8 +57,7 @@ func (c *HTTPServer) Run() error {
 	router.Method("GET", "/schedule", reply.ErrorDecorator(c.getSchedule))
 	router.Method("GET", "/next_takings", reply.ErrorDecorator(c.getNextTakings))
 
-	log.Println("Starting server on", c.listenPort)
-	return http.ListenAndServe(c.listenPort, router)
+	return router
 }
 
 // @Summary Add a new schedule [! Предпочтительнее использовать http-клиент для post-запросов, например Postman]
@@ -72,7 +70,7 @@ func (c *HTTPServer) Run() error {
 // @Failure 404 {object} APIError "Resource not found"
 // @Failure 500 {object} APIError "Internal server error"
 // @Router /schedule [post]
-func (c *HTTPServer) addSchedule(w http.ResponseWriter, r *http.Request) error {
+func (c *HTTPRouter) addSchedule(w http.ResponseWriter, r *http.Request) error {
 	schedule := rest.Schedule{}
 	if err := json.NewDecoder(r.Body).Decode(&schedule); err != nil {
 		return fmt.Errorf("failed to parse schedule into json: %w", err)
@@ -98,7 +96,7 @@ func (c *HTTPServer) addSchedule(w http.ResponseWriter, r *http.Request) error {
 // @Failure 404 {object} APIError "Resource not found"
 // @Failure 500 {object} APIError "Internal server error"
 // @Router /schedules [get]
-func (c *HTTPServer) getScheduleIDs(w http.ResponseWriter, r *http.Request) error {
+func (c *HTTPRouter) getScheduleIDs(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
 		return fmt.Errorf("invalid user_id: %v; %w", err, errcodes.ErrBadRequest)
@@ -130,7 +128,7 @@ func (c *HTTPServer) getScheduleIDs(w http.ResponseWriter, r *http.Request) erro
 // @Failure 404 {object} APIError "Resource not found"
 // @Failure 500 {object} APIError "Internal server error"
 // @Router /schedule [get]
-func (c *HTTPServer) getSchedule(w http.ResponseWriter, r *http.Request) error {
+func (c *HTTPRouter) getSchedule(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
 		return fmt.Errorf("invalid user_id: %v; %w", err, errcodes.ErrBadRequest)
@@ -159,7 +157,7 @@ func (c *HTTPServer) getSchedule(w http.ResponseWriter, r *http.Request) error {
 // @Failure 404 {object} APIError "Resource not found"
 // @Failure 500 {object} APIError "Internal server error"
 // @Router /next_takings [get]
-func (c *HTTPServer) getNextTakings(w http.ResponseWriter, r *http.Request) error {
+func (c *HTTPRouter) getNextTakings(w http.ResponseWriter, r *http.Request) error {
 	userID, err := strconv.Atoi(r.URL.Query().Get("user_id"))
 	if err != nil {
 		return fmt.Errorf("invalid user_id: %v; %w", err, errcodes.ErrBadRequest)

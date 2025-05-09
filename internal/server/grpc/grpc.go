@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 	"net"
-	"strconv"
 
 	pb "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/grpc/ikakbolit"
 	"github.com/infinity-ocean/ikakbolit/internal/domain/entity"
@@ -16,7 +15,7 @@ import (
 type GRPCServer struct {
 	pb.UnimplementedIkakbolitServiceServer
 	svc  service
-	port string
+	Port string
 	log  *slog.Logger
 }
 
@@ -27,18 +26,18 @@ type service interface {
 	GetNextTakings(context.Context, int) ([]entity.Schedule, error)
 }
 
-func NewGRPCServer(svc service, port int, logger *slog.Logger) *GRPCServer {
-    portStr := ":" + strconv.Itoa(port)
+func NewGRPCServer(svc service, port string, logger *slog.Logger) *GRPCServer {
+    portStr := ":" + port
 	
     return &GRPCServer{
 		svc:  svc,
-		port: portStr,
+		Port: portStr,
 		log:  logger,
 	}
 }
 
 func (s *GRPCServer) Run() error {
-	lis, err := net.Listen("tcp", s.port)
+	lis, err := net.Listen("tcp", s.Port)
 	if err != nil {
 		return err
 	}
@@ -49,7 +48,7 @@ func (s *GRPCServer) Run() error {
 
 	pb.RegisterIkakbolitServiceServer(grpcServer, s)
 
-	s.log.Info("starting gRPC server", slog.String("port", s.port))
+	s.log.Info("starting gRPC server", slog.String("port", s.Port))
 	return grpcServer.Serve(lis)
 }
 
