@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/infinity-ocean/ikakbolit/internal/domain/entity"
-	"github.com/infinity-ocean/ikakbolit/internal/repository"
+	"github.com/infinity-ocean/ikakbolit/internal/infrastructure/repository"
 	"github.com/infinity-ocean/ikakbolit/pkg/errcodes"
 )
 

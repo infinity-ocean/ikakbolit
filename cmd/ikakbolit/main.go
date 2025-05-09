@@ -11,7 +11,7 @@ import (
 	"github.com/infinity-ocean/ikakbolit/internal/server/grpc"
 	"github.com/infinity-ocean/ikakbolit/internal/server/rest"
 	"github.com/infinity-ocean/ikakbolit/pkg/application/connectors"
-	"github.com/infinity-ocean/ikakbolit/internal/repository"
+	"github.com/infinity-ocean/ikakbolit/internal/infrastructure/repository"
 	"github.com/infinity-ocean/ikakbolit/internal/domain/service"
 	"github.com/joho/godotenv"
 )
