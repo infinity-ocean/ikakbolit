@@ -1,53 +1,44 @@
 package connectors
 
 import (
-	"io"
+	"context"
 	"log/slog"
 	"os"
+	"sync"
+	"time"
+
+	"github.com/lmittmann/tint"
 )
 
-type logger struct {
-	logger *slog.Logger
-	file   *os.File
+type Slog struct {
+	value   *slog.Logger
+	Name    string
+	Version string
+	init    sync.Once
+	Debug   bool
 }
 
-func MustInitLogger() *slog.Logger {
-	log, err := NewLogger()
-	if err != nil {
-		log := slog.New(slog.NewTextHandler(os.Stderr, nil))
-		log.Error("failed to initialize logger", slog.Any("err", err))
-		os.Exit(1)
-	}
-	return log
-}
+func (s *Slog) Logger(_ context.Context) *slog.Logger {
+	s.init.Do(func() {
+		if s.Debug {
+			s.value = slog.New(tint.NewHandler(os.Stdout, &tint.Options{
+				AddSource:   false,
+				Level:       slog.LevelDebug,
+				ReplaceAttr: nil,
+				TimeFormat:  time.StampMilli,
+				NoColor:     false,
+			}))
 
-func NewLogger() (*slog.Logger, error) {
-	var w io.Writer
-
-	if os.Getenv("DEBUG") == "false" {
-		file, err := os.OpenFile(
-			os.Getenv("LOGGING_FILE_PATH"),
-			os.O_CREATE|os.O_APPEND|os.O_WRONLY,
-			0o644)
-		if err != nil {
-			return nil, err
+			return
 		}
-		w = io.MultiWriter(os.Stdout, file)
-	}
 
-	var level slog.Level
-	switch os.Getenv("LOGGING_LEVEL") {
-	case "debug":
-		level = slog.LevelDebug
-	case "error":
-		level = slog.LevelError
-	default:
-		level = slog.LevelInfo
-	}
-
-	handler := slog.NewJSONHandler(w, &slog.HandlerOptions{
-		Level: level,
+		s.value = slog.New(slog.NewJSONHandler(os.Stdout, nil)).With(
+			slog.Group("app",
+				slog.String("name", s.Name),
+				slog.String("version", s.Version),
+			),
+		)
 	})
 
-	return slog.New(handler), nil
+	return s.value
 }
