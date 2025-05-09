@@ -2,18 +2,20 @@ package main
 
 import (
 	"context"
-	"log"
 	"log/slog"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
+	"github.com/infinity-ocean/ikakbolit/internal/config"
+	"github.com/infinity-ocean/ikakbolit/internal/domain/service"
+	"github.com/infinity-ocean/ikakbolit/internal/infrastructure/repository"
 	"github.com/infinity-ocean/ikakbolit/internal/server/grpc"
 	"github.com/infinity-ocean/ikakbolit/internal/server/rest"
 	"github.com/infinity-ocean/ikakbolit/pkg/application/connectors"
-	"github.com/infinity-ocean/ikakbolit/internal/infrastructure/repository"
-	"github.com/infinity-ocean/ikakbolit/internal/domain/service"
-	"github.com/joho/godotenv"
+
+	"github.com/samber/lo"
 )
 
 // @title ikakbolit API
@@ -27,21 +29,17 @@ import (
 // @BasePath /
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		if err := godotenv.Load("../../.env"); err != nil{
-			log.Fatalf("Failed to load .env: %v", err)
-		}
-	}
+	cfg := lo.Must(config.Load())
 
 	log := connectors.MustInitLogger()
-	if os.Getenv("DEBUG") == "true" {
+	if cfg.Debug {
 		log = slog.Default()
 		log.Info("Running in DEBUG mode")
 	}
 	
 	log.Info("Program is starting...")
 
-	pool, err := repository.MakePool()
+	pool, err := repository.MakePool(cfg.Postgres.DSN)
 	if err != nil {
 		log.Error("Failed to create database pool:", "err", err)
 		os.Exit(1)
@@ -50,11 +48,11 @@ func main() {
 	repo := repository.New(pool)
 	svc := service.New(repo, log)
 
-	grpcCtrl := grpc.NewGRPCServer(svc, ":50051", log)
-	restCtrl := rest.NewHTTPServer(svc, ":8080", log)
+	grpcCtrl := grpc.NewGRPCServer(svc, cfg.GRPC.ListenAddress, log)
+	restCtrl := rest.NewHTTPServer(svc, cfg.HTTP.ListenAddress, log)
 
 	go func() {
-		log.Info("Starting gRPC server on :50051")
+		log.Info("Starting gRPC server", "address", strconv.Itoa(cfg.GRPC.ListenAddress))
 		if err := grpcCtrl.Run(); err != nil {
 			log.Error("gRPC server error:", "err", err)
 			os.Exit(1)
@@ -62,7 +60,7 @@ func main() {
 	}()
 
 	go func() {
-		log.Info("Starting REST server on :8080")
+		log.Info("Starting REST server", "address", strconv.Itoa(cfg.HTTP.ListenAddress))
 		if err := restCtrl.Run(); err != nil {
 			log.Error("REST server error:", "err", err)
 			os.Exit(1)

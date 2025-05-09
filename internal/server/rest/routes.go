@@ -33,8 +33,9 @@ type service interface {
 	GetNextTakings(context.Context, int) ([]entity.Schedule, error)
 }
 
-func NewHTTPServer(svc service, port string, log *slog.Logger) *HTTPServer {
-	return &HTTPServer{service: svc, listenPort: port, log: log}
+func NewHTTPServer(svc service, port int, log *slog.Logger) *HTTPServer {
+	portStr := ":" + strconv.Itoa(port)
+	return &HTTPServer{service: svc, listenPort: portStr, log: log}
 }
 
 func (c *HTTPServer) Run() error {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"net"
+	"strconv"
 
 	pb "github.com/infinity-ocean/ikakbolit/3-api-grpc-Homework/grpc/ikakbolit"
 	"github.com/infinity-ocean/ikakbolit/internal/domain/entity"
@@ -26,10 +27,12 @@ type service interface {
 	GetNextTakings(context.Context, int) ([]entity.Schedule, error)
 }
 
-func NewGRPCServer(svc service, port string, logger *slog.Logger) *gRPCServer {
-	return &gRPCServer{
+func NewGRPCServer(svc service, port int, logger *slog.Logger) *gRPCServer {
+    portStr := ":" + strconv.Itoa(port)
+	
+    return &gRPCServer{
 		svc:  svc,
-		port: port,
+		port: portStr,
 		log:  logger,
 	}
 }

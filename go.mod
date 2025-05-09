@@ -13,7 +13,6 @@ require (
 	github.com/go-openapi/validate v0.24.0
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/jessevdk/go-flags v1.6.1
-	github.com/joho/godotenv v1.5.1
 	github.com/swaggo/swag v1.16.4
 	golang.org/x/net v0.35.0
 	google.golang.org/grpc v1.72.0
@@ -48,6 +47,7 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/samber/lo v1.50.0
 	github.com/swaggo/http-swagger v1.3.4
 	golang.org/x/crypto v0.33.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect
