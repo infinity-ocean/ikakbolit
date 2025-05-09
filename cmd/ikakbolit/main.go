@@ -1,21 +1,10 @@
 package main
 
 import (
-	"context"
-	"log/slog"
+	"fmt"
 	"os"
-	"os/signal"
-	"syscall"
 
-	"github.com/infinity-ocean/ikakbolit/internal/config"
-	"github.com/infinity-ocean/ikakbolit/internal/domain/service"
-	"github.com/infinity-ocean/ikakbolit/internal/infrastructure/repository"
-	"github.com/infinity-ocean/ikakbolit/internal/server/grpc"
-	"github.com/infinity-ocean/ikakbolit/internal/server/rest"
-	"github.com/infinity-ocean/ikakbolit/pkg/application/connectors"
-	"github.com/infinity-ocean/ikakbolit/pkg/application/modules"
-
-	"github.com/samber/lo"
+	"github.com/infinity-ocean/ikakbolit/internal/application"
 )
 
 // @title ikakbolit API
@@ -28,35 +17,11 @@ import (
 // @host localhost:8080
 // @BasePath /
 
+var appVersion = "v1.0.0" //nolint:gochecknoglobals
+
 func main() {
-	cfg := lo.Must(config.Load())
-
-	log := connectors.MustInitLogger()
-	if cfg.Debug {
-		log = slog.Default()
-		log.Info("Running in DEBUG mode")
-	}
-	
-	log.Info("Program is starting...")
-
-	pool, err := repository.MakePool(cfg.Postgres.DSN)
-	if err != nil {
-		log.Error("Failed to create database pool:", "err", err)
+	if err := application.New(appVersion).Run(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-
-	repo := repository.New(pool)
-	svc := service.New(repo, log)
-
-	grpc := grpc.NewGRPCServer(svc, cfg.GRPC.ListenAddress, log)
-	rest := rest.NewHTTPServer(svc, cfg.HTTP.ListenAddress, log)
-
-	modules.HTTPServer{}.Run(rest, cfg, log)
-	modules.GRPCServer{}.Run(grpc, cfg, log)
-	
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
-
-	<-ctx.Done()
-	log.Info("Shutdown signal received, shutting down servers...")
 }
