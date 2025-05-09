@@ -10,15 +10,15 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type repo struct {
+type Repo struct {
 	pool *pgxpool.Pool
 }
 
-func New(pool *pgxpool.Pool) *repo {
-	return &repo{pool: pool}
+func New(pool *pgxpool.Pool) *Repo {
+	return &Repo{pool: pool}
 }
 
-func (r *repo) InsertSchedule(sched entity.Schedule) (int, error) {
+func (r *Repo) InsertSchedule(sched entity.Schedule) (int, error) {
 	ctx := context.Background()
 	conn, err := r.pool.Acquire(ctx)
 	if err != nil {
@@ -38,7 +38,7 @@ func (r *repo) InsertSchedule(sched entity.Schedule) (int, error) {
 	return id, nil
 }
 
-func (r *repo) SelectSchedules(userID int) ([]entity.Schedule, error) {
+func (r *Repo) SelectSchedules(userID int) ([]entity.Schedule, error) {
 	conn, err := r.pool.Acquire(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("failed to accquire connection pool: %w", err)
@@ -76,7 +76,7 @@ func (r *repo) SelectSchedules(userID int) ([]entity.Schedule, error) {
 	return schedules, nil
 }
 
-func (r *repo) SelectSchedule(userID int, schedID int) (entity.Schedule, error) {
+func (r *Repo) SelectSchedule(userID int, schedID int) (entity.Schedule, error) {
 	conn, err := r.pool.Acquire(context.Background())
 	if err != nil {
 		return entity.Schedule{}, fmt.Errorf("failed to accquire connection pool: %w", err)
