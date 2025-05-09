@@ -50,6 +50,6 @@ require (
 	github.com/samber/lo v1.50.0
 	github.com/swaggo/http-swagger v1.3.4
 	golang.org/x/crypto v0.33.0 // indirect
-	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/sync v0.11.0
 	golang.org/x/text v0.22.0 // indirect
 )

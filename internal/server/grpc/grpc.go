@@ -13,7 +13,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type gRPCServer struct {
+type GRPCServer struct {
 	pb.UnimplementedIkakbolitServiceServer
 	svc  service
 	port string
@@ -27,17 +27,17 @@ type service interface {
 	GetNextTakings(context.Context, int) ([]entity.Schedule, error)
 }
 
-func NewGRPCServer(svc service, port int, logger *slog.Logger) *gRPCServer {
+func NewGRPCServer(svc service, port int, logger *slog.Logger) *GRPCServer {
     portStr := ":" + strconv.Itoa(port)
 	
-    return &gRPCServer{
+    return &GRPCServer{
 		svc:  svc,
 		port: portStr,
 		log:  logger,
 	}
 }
 
-func (s *gRPCServer) Run() error {
+func (s *GRPCServer) Run() error {
 	lis, err := net.Listen("tcp", s.port)
 	if err != nil {
 		return err
@@ -53,7 +53,7 @@ func (s *gRPCServer) Run() error {
 	return grpcServer.Serve(lis)
 }
 
-func (s *gRPCServer) AddSchedule(ctx context.Context, req *pb.RequestSchedule) (*pb.ResponseScheduleID, error) {
+func (s *GRPCServer) AddSchedule(ctx context.Context, req *pb.RequestSchedule) (*pb.ResponseScheduleID, error) {
     schedule := entity.Schedule{
         UserID:       int(req.UserId),
         CureName:     req.CureName,
@@ -67,7 +67,7 @@ func (s *gRPCServer) AddSchedule(ctx context.Context, req *pb.RequestSchedule) (
     return &pb.ResponseScheduleID{ScheduleId: int64(id)}, nil
 }
 
-func (s *gRPCServer) GetScheduleIDs(ctx context.Context, req *pb.RequestUserID) (*pb.ResponseScheduleIDs, error) {
+func (s *GRPCServer) GetScheduleIDs(ctx context.Context, req *pb.RequestUserID) (*pb.ResponseScheduleIDs, error) {
     ids, err := s.svc.GetScheduleIDs(ctx, int(req.UserId))
     if err != nil {
         return nil, err
@@ -79,7 +79,7 @@ func (s *gRPCServer) GetScheduleIDs(ctx context.Context, req *pb.RequestUserID) 
     return out, nil
 }
 
-func (s *gRPCServer) GetSchedule(ctx context.Context, req *pb.RequestUserIDScheduleID) (*pb.ResponseSchedule, error) {
+func (s *GRPCServer) GetSchedule(ctx context.Context, req *pb.RequestUserIDScheduleID) (*pb.ResponseSchedule, error) {
     sched, err := s.svc.GetScheduleWithIntake(ctx, int(req.UserId), int(req.ScheduleId))
     if err != nil {
         return nil, err
@@ -95,7 +95,7 @@ func (s *gRPCServer) GetSchedule(ctx context.Context, req *pb.RequestUserIDSched
     }, nil
 }
 
-func (s *gRPCServer) GetNextTakings(ctx context.Context, req *pb.RequestNextTakings) (*pb.ResponseNextTakings, error) {
+func (s *GRPCServer) GetNextTakings(ctx context.Context, req *pb.RequestNextTakings) (*pb.ResponseNextTakings, error) {
     schedules, err := s.svc.GetNextTakings(ctx, int(req.UserId))
     if err != nil {
         return nil, err
