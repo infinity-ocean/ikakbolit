@@ -17,16 +17,16 @@ type HTTPServer struct {
 	Log    *slog.Logger
 }
 
-func (h HTTPServer) Run(
+func (s HTTPServer) Run(
 	_ context.Context,
 	g *errgroup.Group,
 ) {
 	g.Go(func() error {
-		h.Log.Info("Starting HTTP server", "port", h.Port)
-		if err := http.ListenAndServe(h.Port, h.Router.GetRouter()); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		s.Log.Info("Starting HTTP server", "port", s.Port)
+		if err := http.ListenAndServe(s.Port, s.Router.GetRouter()); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			return fmt.Errorf("http.ListenAndServe: %w", err)
 		}
-		h.Log.Info("http server stopped")
+		s.Log.Info("http server stopped")
 
 		return nil
 	})

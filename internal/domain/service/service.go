@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"os"
-	"strconv"
 	"time"
 
+	"github.com/infinity-ocean/ikakbolit/internal/config"
 	"github.com/infinity-ocean/ikakbolit/internal/domain/entity"
 	"github.com/infinity-ocean/ikakbolit/internal/infrastructure/repository"
 	"github.com/infinity-ocean/ikakbolit/pkg/errcodes"
@@ -16,6 +15,7 @@ import (
 type Service struct {
 	repo repo
 	log  *slog.Logger
+	cfg  config.Config
 }
 
 type repo interface {
@@ -24,15 +24,15 @@ type repo interface {
 	SelectSchedule(int, int) (entity.Schedule, error)
 }
 
-func New(repo repo, log *slog.Logger) *Service {
-	return &Service{repo: repo, log: log}
+func New(repo repo, log *slog.Logger, cfg config.Config) *Service {
+	return &Service{repo: repo, log: log, cfg: cfg}
 }
 
 func (s *Service) AddSchedule(ctx context.Context, schedule entity.Schedule) (int, error) {
 	if schedule.DosesPerDay < 1 || schedule.DosesPerDay > 12 {
 		return 0, fmt.Errorf("doses per day must be between 1 and 12: %w", errcodes.ErrBadRequest)
 	}
-	
+
 	log := s.logger(ctx)
 	log.Info("starting to add schedule", "user_id", schedule.UserID)
 
@@ -105,12 +105,7 @@ func (s *Service) GetNextTakings(ctx context.Context, userID int) ([]entity.Sche
 		return nil, nil
 	}
 
-	windowMinStr := os.Getenv("CURE_SCHEDULE_WINDOW_MIN")
-	windowMin, err := strconv.Atoi(windowMinStr)
-	if err != nil {
-		log.Error("invalid CURE_SCHEDULE_WINDOW_MIN env var", "value", windowMinStr, "error", err)
-		return nil, fmt.Errorf("env CURE_SCHEDULE_WINDOW_MIN is not int: %w", err)
-	}
+	windowMin := s.cfg.Options.CureScheduleWindowMinutes
 	windowDuration := time.Duration(windowMin) * time.Minute
 
 	now := time.Now()
@@ -220,8 +215,8 @@ type ctxKey string
 const requestIDKey ctxKey = "request_id"
 
 func GetReqID(ctx context.Context) string {
-    if reqID, ok := ctx.Value(requestIDKey).(string); ok {
-        return reqID
-    }
-    return ""
+	if reqID, ok := ctx.Value(requestIDKey).(string); ok {
+		return reqID
+	}
+	return ""
 }

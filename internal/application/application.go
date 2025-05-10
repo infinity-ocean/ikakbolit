@@ -22,56 +22,55 @@ type App struct {
 	cfg          config.Config
 	log          *connectors.Slog
 	httpServer   *modules.HTTPServer
-	grpcServer   *grpc.GRPCServer
 	Service      *service.Service
 	Repo         *repository.Repo
 	postgresPool *pgxpool.Pool
 }
 
-func New(appVersion string) App { //nolint:funlen
-	const appName = "ikakbolit"
-
-	cfg := lo.Must(config.Load())
-	log := &connectors.Slog{Name: appName, Version: appVersion, Debug: cfg.Debug}
-
-	pool := lo.Must(repository.MakePool(cfg.Postgres.DSN))
-
-	repo := repository.New(pool)
-
-	return App{
-		cfg: cfg,
-		log: log,
-		httpServer: &modules.HTTPServer{
-			Port: cfg.HTTP.Port,
-		},
-		grpcServer: &grpc.GRPCServer{
-			Port: cfg.GRPC.Port,
-		},
-		Repo:         repo,
-		postgresPool: pool,
+func New() *App {
+	return &App{
+		cfg:          config.Config{},
+		log:          nil,
+		httpServer:   nil,
+		Service:      nil,
+		Repo:         nil,
+		postgresPool: nil,
 	}
 }
 
-func (app App) Run() error {
+func (app *App) Init(appVersion string) error { //nolint:funlen
+	const appName = "ikakbolit"
+
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-
 	defer stop()
-
-	log := app.log.Logger(ctx)
-
-	log.Info("Program is starting...")
 
 	g, ctx := errgroup.WithContext(ctx)
 
-	app.httpServer.Log = log
-	app.httpServer.Router = rest.NewHTTPRouter(app.Service, app.cfg.HTTP.Port, log)
-	grpc := grpc.NewGRPCServer(app.Service, app.cfg.GRPC.Port, log)
+	app.cfg = lo.Must(config.Load())
+	app.log = &connectors.Slog{Name: appName, Version: appVersion, Debug: app.cfg.Debug}
+	log := app.log.Logger(ctx)
+	log.Info("Program is starting...")
+
+	app.postgresPool = lo.Must(repository.MakePool(app.cfg.Postgres.DSN))
+	app.Repo = repository.New(app.postgresPool)
+	app.Service = service.New(app.Repo, log, app.cfg)
+
+	app.httpServer = &modules.HTTPServer{
+		Port:   app.cfg.HTTP.Port,
+		Log:    log,
+		Router: rest.NewHTTPRouter(app.Service, app.cfg.HTTP.Port, log),
+	}
+	grpcServer := grpc.NewGRPCServer(app.Service, app.cfg.GRPC.Port, log)
 
 	app.httpServer.Run(ctx, g)
-	modules.RunGRPC(grpc, app.cfg, log)
+	g.Go(func() error {
+		return grpcServer.Run()
+	})
+
 	log.Info("Servers are started")
 
 	<-ctx.Done()
 	log.Info("Shutdown signal received, shutting down servers...")
-	return nil
+
+	return g.Wait()
 }
