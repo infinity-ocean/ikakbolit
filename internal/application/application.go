@@ -64,7 +64,7 @@ func (app *App) Init(appVersion string) error { //nolint:funlen
 
 	app.httpServer.Run(ctx, g)
 	g.Go(func() error {
-		return grpcServer.Run()
+		return grpcServer.Run(ctx)
 	})
 
 	log.Info("Servers are started")

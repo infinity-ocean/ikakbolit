@@ -34,7 +34,7 @@ func NewGRPCServer(svc service, port string, logger *slog.Logger) *gRPCServer {
 	}
 }
 
-func (s *gRPCServer) Run() error {
+func (s *gRPCServer) Run(ctx context.Context) error {
 	lis, err := net.Listen("tcp", s.port)
 	if err != nil {
 		return err
@@ -47,7 +47,21 @@ func (s *gRPCServer) Run() error {
 	pb.RegisterIkakbolitServiceServer(grpcServer, s)
 
 	s.log.Info("starting gRPC server", slog.String("port", s.port))
-	return grpcServer.Serve(lis)
+
+
+	serveErr := make(chan error, 1)
+	go func() {
+		serveErr <- grpcServer.Serve(lis)
+	}()
+
+	select {
+	case <-ctx.Done():
+		s.log.Info("shutting down gRPC server")
+		grpcServer.GracefulStop()
+		return ctx.Err()
+	case err := <-serveErr:
+		return err
+	}
 }
 
 func (s *gRPCServer) AddSchedule(ctx context.Context, req *pb.RequestSchedule) (*pb.ResponseScheduleID, error) {

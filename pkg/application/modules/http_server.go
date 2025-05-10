@@ -11,6 +11,8 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+const shutdownTimeout = 5 * 1e9
+
 type HTTPServer struct {
 	Port   string
 	Router *rest.HTTPRouter
@@ -18,16 +20,28 @@ type HTTPServer struct {
 }
 
 func (s HTTPServer) Run(
-	_ context.Context,
+	ctx context.Context,
 	g *errgroup.Group,
 ) {
+	server := &http.Server{
+		Addr:    s.Port,
+		Handler: s.Router.GetRouter(),
+	}
+
 	g.Go(func() error {
 		s.Log.Info("Starting HTTP server", "port", s.Port)
-		if err := http.ListenAndServe(s.Port, s.Router.GetRouter()); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			return fmt.Errorf("http.ListenAndServe: %w", err)
 		}
-		s.Log.Info("http server stopped")
-
+		s.Log.Info("HTTP server stopped")
 		return nil
+	})
+
+	g.Go(func() error {
+		<-ctx.Done()
+		s.Log.Info("Shutting down HTTP server")
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		defer cancel()
+		return server.Shutdown(shutdownCtx)
 	})
 }
