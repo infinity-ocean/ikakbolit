@@ -1,31 +1,28 @@
 include .env
-export
-
-# Директория, в которой хранятся исполняемые
-# файлы проекта и зависимости, необходимые для сборки.
-LOCAL_BIN := $(CURDIR)/bin
 MIGRATIONS_DIR := ./db/migrations
 PROTO_SRC := 3-api-grpc-Homework/grpc/ikakbolit.proto
 PROTO_OUT := 3-api-grpc-Homework/grpc/ikakbolit
+
+POSTGRES_DSN := postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@localhost:$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=$(POSTGRES_SSL)
 
 run:
 	go run cmd/ikakbolit/main.go   
 
 start-infra:
-	docker-compose up -d
+	docker-compose up --build -d
 
 stop-infra:
 	docker-compose down
 	
 unit-test:
-	go test -short ./...
+	go test -short -v -timeout=2m -cover -coverpkg=./... -coverprofile=cover.out ./...
 
 test:
-	$(MAKE) goose-down
 	$(MAKE) goose-up
-	go test -v -coverprofile tests/cover.out -coverpkg=./... ./...
+	go test -v -timeout=2m -coverpkg=./... -coverprofile=cover.out ./...
 	grep -v "\.gen\.go\>" tests/cover.out | grep -v '_test\>' | grep -v '\<tests\>' > tests/cover.skipgen.out
 	go tool cover -func=tests/cover.skipgen.out #go tool cover -html=tests/cover.skipgen.out
+	$(MAKE) goose-down
 
 lint: nilaway
 	golangci-lint run --config .golangci.yml

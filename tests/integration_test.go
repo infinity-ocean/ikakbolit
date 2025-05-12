@@ -2,17 +2,23 @@ package tests
 
 import (
 	"context"
-	"net/http"
-	"os"
+	"fmt"
+
+	"net/http/httptest"
 	"sync"
 	"testing"
-	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
+	"github.com/samber/lo"
 
 	"github.com/infinity-ocean/ikakbolit/internal/application"
 	"github.com/infinity-ocean/ikakbolit/internal/config"
+	"github.com/infinity-ocean/ikakbolit/internal/domain/service"
+	"github.com/infinity-ocean/ikakbolit/internal/infrastructure/repository"
+	"github.com/infinity-ocean/ikakbolit/internal/server/rest"
+	"github.com/infinity-ocean/ikakbolit/pkg/application/connectors"
 	"github.com/infinity-ocean/ikakbolit/pkg/dbtest"
 	"github.com/infinity-ocean/ikakbolit/pkg/tests"
 	"github.com/stretchr/testify/suite"
@@ -20,14 +26,11 @@ import (
 
 type Suite struct {
 	suite.Suite
-
-	wg sync.WaitGroup
-
-	cfg config.Config
-
+	wg        sync.WaitGroup
+	cfg       config.Config
 	apiClient tests.APIClient
-
-	db *sqlx.DB
+	ts        *httptest.Server
+	db        *sqlx.DB
 }
 
 func TestIntegration(t *testing.T) {
@@ -39,32 +42,36 @@ func TestIntegration(t *testing.T) {
 }
 
 func (s *Suite) SetupSuite() {
-	var app *application.App
+	godotenv.Load("../.env")
 
-	var err error
 	rq := s.Require()
 
 	ctx := context.Background()
 
-	s.wg.Add(1)
-	go func() {
-		defer s.wg.Done()
-
-		app = application.New()
-		app.Run("v0.0.0")
-	}()
-
-	time.Sleep(time.Second)
+	app := application.New()
 
 	s.cfg = app.Cfg
+	fmt.Println("check dsn")
+	fmt.Println(s.cfg.Postgres.DSN)
 
+	var err error
 	s.db, err = sqlx.ConnectContext(ctx, "pgx", s.cfg.Postgres.DSN)
 	rq.NoError(err)
 
+	pool := lo.Must(repository.MakePool(app.Cfg.Postgres.DSN))
+	repo := repository.New(pool)
+
+	logger := connectors.Slog{Debug: true}
+	slog := logger.Logger(context.Background())
+
+	svc := service.New(repo, slog, app.Cfg)
+
+	router := rest.NewHTTPRouter(svc, app.Cfg.HTTP.Port, slog)
+	s.ts = httptest.NewServer(router.GetRouter())
 
 	s.apiClient = tests.NewAPIClient(
-		"http://"+s.cfg.HTTP.ListenAddress+s.cfg.HTTP.Port,
-		http.DefaultClient,
+		s.ts.URL,
+		s.ts.Client(),
 	)
 }
 
@@ -78,11 +85,7 @@ func (s *Suite) SetupTest() {
 func (s *Suite) TearDownSuite() {
 	rq := s.Require()
 
-	p, err := os.FindProcess(os.Getpid())
-	rq.NoError(err)
-	rq.NoError(p.Signal(os.Interrupt))
-
 	s.wg.Wait()
-
+	s.ts.Close()
 	rq.NoError(s.db.Close())
 }

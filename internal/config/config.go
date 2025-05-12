@@ -2,10 +2,7 @@ package config
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/caarlos0/env/v10"
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -18,13 +15,6 @@ type Config struct {
 }
 
 func Load() (Config, error) {
-	if err := godotenv.Load(".env"); err != nil {
-		if err := godotenv.Load("../.env"); err != nil {
-			if err := godotenv.Load("../../.env"); err != nil {
-			log.Fatalf("Failed to load .env: %v", err)
-		}
-		}
-	}
 	var config Config
 
 	if err := env.Parse(&config); err != nil {

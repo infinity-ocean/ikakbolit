@@ -1,5 +1,8 @@
+version: "3.9"
+
 volumes:
   postgres_volume:
+
 
 services:
   postgres:
@@ -7,10 +10,29 @@ services:
     ports:
       - ${POSTGRES_PORT}:5432
     environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_SSL=${POSTGRES_SSL}
     volumes:
       - postgres_volume:/var/lib/postgresql/data/
+    restart: on-failure
+
+  ikakbolit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    env_file:
+      - .env
+
+    environment:
+      - POSTGRES_DSN=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=${POSTGRES_SSL}
+
+    depends_on:
+      - postgres
+
+    ports:
+      - "8080:8080"
+      - "50051:50051"
     restart: on-failure

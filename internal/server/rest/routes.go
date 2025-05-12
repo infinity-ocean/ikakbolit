@@ -33,8 +33,7 @@ type service interface {
 }
 
 func NewHTTPRouter(svc service, port string, log *slog.Logger) *HTTPRouter {
-	portStr := ":" + port
-	return &HTTPRouter{service: svc, ListenPort: portStr, log: log}
+	return &HTTPRouter{service: svc, ListenPort: port, log: log}
 }
 
 func (c *HTTPRouter) GetRouter() *chi.Mux {
@@ -52,7 +51,7 @@ func (c *HTTPRouter) GetRouter() *chi.Mux {
 		swagger.DomID("swagger-ui"),
 	))
 
-	router.Method("POST", "/schedule", reply.ErrorDecorator(c.addSchedule))
+	router.Method("POST", "/schedule", reply.ErrorDecorator(c.AddSchedule))
 	router.Method("GET", "/schedules", reply.ErrorDecorator(c.getScheduleIDs))
 	router.Method("GET", "/schedule", reply.ErrorDecorator(c.getSchedule))
 	router.Method("GET", "/next_takings", reply.ErrorDecorator(c.getNextTakings))
@@ -70,7 +69,7 @@ func (c *HTTPRouter) GetRouter() *chi.Mux {
 // @Failure 404 {object} APIError "Resource not found"
 // @Failure 500 {object} APIError "Internal server error"
 // @Router /schedule [post]
-func (c *HTTPRouter) addSchedule(w http.ResponseWriter, r *http.Request) error {
+func (c *HTTPRouter) AddSchedule(w http.ResponseWriter, r *http.Request) error {
 	schedule := rest.Schedule{}
 	if err := json.NewDecoder(r.Body).Decode(&schedule); err != nil {
 		return fmt.Errorf("failed to parse schedule into json: %w", err)
