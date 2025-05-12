@@ -27,6 +27,12 @@ test:
 	grep -v "\.gen\.go\>" tests/cover.out | grep -v '_test\>' | grep -v '\<tests\>' > tests/cover.skipgen.out
 	go tool cover -func=tests/cover.skipgen.out #go tool cover -html=tests/cover.skipgen.out
 
+lint: nilaway
+	golangci-lint run --config .golangci.yml
+
+nilaway:
+	nilaway -include-pkgs="ikakbolit" ./...
+
 goose-up:
 	goose -allow-missing -dir $(MIGRATIONS_DIR) postgres "$(POSTGRES_DSN)" up
 
@@ -38,6 +44,7 @@ install-deps:
 	go install github.com/go-swagger/go-swagger/cmd/swagger@latest
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	go install go.uber.org/nilaway/cmd/nilaway@latest
 
 # кодогенерация на основе openapi 
 swagger-gen:
