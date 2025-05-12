@@ -63,7 +63,7 @@ Swagger-документация API: http://localhost:8080/swagger/index.html (
 | `make swagger-gen`  | Генерирует серверный код по OpenAPI-спецификации:                                          |
 | `make proto-gen`    | Генерирует Go и gRPC код по `.proto` файлу                                                 |
 
-# Заготовленные запросы для Postman
+#  Заготовленные запросы для Postman <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postman/postman-original.svg" alt="Postman" width="40" height="40"/>
 - **1️⃣ POST http://localhost:8080/schedule** 
 *Прикрепляем подобный JSON в Body*
 ```json
