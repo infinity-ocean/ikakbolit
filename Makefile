@@ -8,6 +8,9 @@ MIGRATIONS_DIR := ./db/migrations
 PROTO_SRC := 3-api-grpc-Homework/grpc/ikakbolit.proto
 PROTO_OUT := 3-api-grpc-Homework/grpc/ikakbolit
 
+run:
+	go run cmd/ikakbolit/main.go   
+
 start-infra:
 	docker-compose up -d
 

@@ -46,7 +46,13 @@ make goose-up
 
 ### 6️⃣ Запуск приложения из корневой папки (для корректной работы с .env файлом)
 ```sh
-go run cmd/ikakbolit/main.go
+make run
+```
+
+### 6️⃣ Запуск тестов
+```sh
+make test
+make unit-test # Юнит тесты 
 ```
 
 Приложение будет доступно по адресу: http://localhost:8080
