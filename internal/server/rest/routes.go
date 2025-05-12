@@ -82,7 +82,7 @@ func (c *HTTPRouter) addSchedule(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	response := rest.ResponseScheduleID{Schedule_id: strconv.Itoa(scheduleID)}
+	response := rest.ResponseScheduleID{ScheduleID: strconv.Itoa(scheduleID)}
 	return reply.JSON(w, http.StatusCreated, response)
 }
 

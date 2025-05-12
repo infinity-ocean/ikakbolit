@@ -1,13 +1,13 @@
 package rest
 
 import (
-	"time"
 	"github.com/infinity-ocean/ikakbolit/internal/domain/entity"
+	"time"
 )
 
 // @name responseScheduleID
 type ResponseScheduleID struct {
-	Schedule_id string `json:"schedule_id"`
+	ScheduleID string `json:"schedule_id"`
 }
 
 // swagger:model Schedule
@@ -19,10 +19,10 @@ type Schedule struct {
 	DurationDays int       `json:"duration_days"`
 	CreatedAt    time.Time `json:"created_at"`
 
-	DayStart     time.Time `json:"-"`
-	DayFinish    time.Time `json:"-"`
-	
-	Intakes      []string  `json:"intakes"`
+	DayStart  time.Time `json:"-"`
+	DayFinish time.Time `json:"-"`
+
+	Intakes []string `json:"intakes"`
 }
 
 func ToModelSchedule(s Schedule) entity.Schedule {
@@ -43,5 +43,9 @@ type SchedulesInWindow struct {
 
 // swagger:model APIError
 type APIError struct {
+	ErrorCode `json:"code"`
+
 	Message string `json:"message"`
 }
+
+type ErrorCode string

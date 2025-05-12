@@ -20,7 +20,7 @@ import (
 var appVersion = "v1.0.0" //nolint:gochecknoglobals
 
 func main() {
-	if err := application.New().Init(appVersion); err != nil {
+	if err := application.New().Run(appVersion); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

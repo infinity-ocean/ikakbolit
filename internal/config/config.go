@@ -18,9 +18,11 @@ type Config struct {
 }
 
 func Load() (Config, error) {
-	if err := godotenv.Load(); err != nil {
-		if err := godotenv.Load("../../.env"); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
+		if err := godotenv.Load("../.env"); err != nil {
+			if err := godotenv.Load("../../.env"); err != nil {
 			log.Fatalf("Failed to load .env: %v", err)
+		}
 		}
 	}
 	var config Config

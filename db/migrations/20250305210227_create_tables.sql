@@ -44,7 +44,7 @@ INSERT INTO scheduled (user_id, cure_name, doses_per_day, duration_days, created
 (8, 'Atorvastatin', 1, 7, NOW()), 
 (9, 'Cetirizine', 2, 10, NOW()),    
 (10, 'Omeprazole', 1, 10, NOW());  
-
+ALTER SEQUENCE scheduled_id_seq RESTART WITH 11;
 -- +goose StatementEnd
 
 -- +goose Down

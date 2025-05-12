@@ -19,7 +19,7 @@ import (
 )
 
 type App struct {
-	cfg          config.Config
+	Cfg          config.Config
 	log          *connectors.Slog
 	httpServer   *modules.HTTPServer
 	Service      *service.Service
@@ -29,7 +29,7 @@ type App struct {
 
 func New() *App {
 	return &App{
-		cfg:          config.Config{},
+		Cfg:          lo.Must(config.Load()),
 		log:          nil,
 		httpServer:   nil,
 		Service:      nil,
@@ -38,7 +38,7 @@ func New() *App {
 	}
 }
 
-func (app *App) Init(appVersion string) error { //nolint:funlen
+func (app *App) Run(appVersion string) error { //nolint:funlen
 	const appName = "ikakbolit"
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -46,21 +46,21 @@ func (app *App) Init(appVersion string) error { //nolint:funlen
 
 	g, ctx := errgroup.WithContext(ctx)
 
-	app.cfg = lo.Must(config.Load())
-	app.log = &connectors.Slog{Name: appName, Version: appVersion, Debug: app.cfg.Debug}
+	
+	app.log = &connectors.Slog{Name: appName, Version: appVersion, Debug: app.Cfg.Debug}
 	log := app.log.Logger(ctx)
 	log.Info("Program is starting...")
 
-	app.postgresPool = lo.Must(repository.MakePool(app.cfg.Postgres.DSN))
+	app.postgresPool = lo.Must(repository.MakePool(app.Cfg.Postgres.DSN))
 	app.Repo = repository.New(app.postgresPool)
-	app.Service = service.New(app.Repo, log, app.cfg)
+	app.Service = service.New(app.Repo, log, app.Cfg)
 
 	app.httpServer = &modules.HTTPServer{
-		Port:   app.cfg.HTTP.Port,
+		Port:   app.Cfg.HTTP.Port,
 		Log:    log,
-		Router: rest.NewHTTPRouter(app.Service, app.cfg.HTTP.Port, log),
+		Router: rest.NewHTTPRouter(app.Service, app.Cfg.HTTP.Port, log),
 	}
-	grpcServer := grpc.NewGRPCServer(app.Service, app.cfg.GRPC.Port, log)
+	grpcServer := grpc.NewGRPCServer(app.Service, app.Cfg.GRPC.Port, log)
 
 	app.httpServer.Run(ctx, g)
 	g.Go(func() error {

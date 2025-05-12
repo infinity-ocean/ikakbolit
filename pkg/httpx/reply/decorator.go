@@ -16,11 +16,20 @@ func ErrorDecorator(f HandlerWithError) http.HandlerFunc {
 		}
 		switch {
 		case errors.Is(err, errcodes.ErrNotFound):
-			JSON(w, http.StatusNotFound, rest.APIError{Message: "resource not found"})
+			JSON(w, http.StatusNotFound, rest.APIError{
+				ErrorCode: "404",
+				Message: "resource not found",
+			})
 		case errors.Is(err, errcodes.ErrBadRequest):
-			JSON(w, http.StatusBadRequest, rest.APIError{Message: "invalid input data"})
+			JSON(w, http.StatusBadRequest, rest.APIError{
+				ErrorCode: "400",
+				Message: "invalid input data",
+			})
 		default:
-			JSON(w, http.StatusInternalServerError, rest.APIError{Message: "internal server error"})
+			JSON(w, http.StatusInternalServerError, rest.APIError{
+				ErrorCode: "500",
+				Message: "internal server error",
+			})
 		}
 	})
 }

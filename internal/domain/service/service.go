@@ -34,7 +34,7 @@ func (s *Service) AddSchedule(ctx context.Context, schedule entity.Schedule) (in
 	}
 
 	log := s.logger(ctx)
-	log.Info("starting to add schedule", "user_id", schedule.UserID)
+	log.Debug("starting to add schedule", "user_id", schedule.UserID)
 
 	id, err := s.repo.InsertSchedule(schedule)
 	if err != nil {
@@ -48,7 +48,7 @@ func (s *Service) AddSchedule(ctx context.Context, schedule entity.Schedule) (in
 
 func (s *Service) GetScheduleIDs(ctx context.Context, userID int) ([]int, error) {
 	log := s.logger(ctx)
-	log.Info("starting to get schedule IDs", "user_id", userID)
+	log.Debug("starting to get schedule IDs", "user_id", userID)
 
 	schedules, err := s.repo.SelectSchedules(userID)
 	if err != nil {
@@ -67,7 +67,7 @@ func (s *Service) GetScheduleIDs(ctx context.Context, userID int) ([]int, error)
 
 func (s *Service) GetScheduleWithIntake(ctx context.Context, userID int, scheduleID int) (entity.Schedule, error) {
 	log := s.logger(ctx)
-	log.Info("starting to get schedule with intake", "user_id", userID, "schedule_id", scheduleID)
+	log.Debug("starting to get schedule with intake", "user_id", userID, "schedule_id", scheduleID)
 
 	schedule, err := s.repo.SelectSchedule(userID, scheduleID)
 	if err != nil {
@@ -93,7 +93,7 @@ func (s *Service) GetScheduleWithIntake(ctx context.Context, userID int, schedul
 
 func (s *Service) GetNextTakings(ctx context.Context, userID int) ([]entity.Schedule, error) {
 	log := s.logger(ctx)
-	log.Info("starting to compute next takings", "user_id", userID)
+	log.Debug("starting to compute next takings", "user_id", userID)
 
 	schedules, err := s.repo.SelectSchedules(userID)
 	if err != nil {
@@ -147,11 +147,11 @@ func (s *Service) GetNextTakings(ctx context.Context, userID int) ([]entity.Sche
 
 func (s *Service) CalculateIntakeTimes(ctx context.Context, dosesPerDay int) ([]string, error) {
 	log := s.logger(ctx)
-	log.Info("Starting calculation of intake times", "doses_per_day", dosesPerDay)
+	log.Debug("Starting calculation of intake times", "doses_per_day", dosesPerDay)
 
 	dayStartStr := "08:00"
 	dayFinishStr := "22:00"
-	log.Info("Using fixed day period for intake calculation", "day_start", dayStartStr, "day_finish", dayFinishStr)
+	log.Debug("Using fixed day period for intake calculation", "day_start", dayStartStr, "day_finish", dayFinishStr)
 
 	dayStart, err := time.Parse("15:04", dayStartStr)
 	if err != nil {
