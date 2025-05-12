@@ -54,7 +54,7 @@ Swagger-документация API: http://localhost:8080/swagger/index.html (
 | `make install-deps` | Устанавливает CLI-инструменты: Goose, Swagger, protoc-gen-go, protoc-gen-go-grpc и Nilaway |
 | `make run`          | Запускает приложение: выполняет `go run cmd/ikakbolit/main.go`                             |
 | `make test`         | Полный прогон тестов с перекаткой миграций:                                                |
-| ------------------- | ------------------------------------------------------------------------------------------ |
+|                     |                                                                                            |
 | `make unit-test`    | Запускает быстрые юнит-тесты (`go test -short ./...`)                                      |
 | `make start-infra`  | Поднимает инфраструктуру: запускает контейнер БД через `docker-compose up -d`              |
 | `make lint`         | Запускает `golangci-lint run --config .golangci.yml`                                       |
