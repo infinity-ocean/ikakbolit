@@ -1,0 +1,1 @@
+DELETE FROM scheduled WHERE id > 10;
