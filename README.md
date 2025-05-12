@@ -1,4 +1,4 @@
-# ikakbolit - Medication Scheduling App 🏥
+# ikakbolit - Medication Scheduling App 🏥🦁
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Go Version](https://img.shields.io/badge/Go-1.23.8-blue)
@@ -18,7 +18,7 @@ cd ikakbolit
 Создай `.env` файл и укажи необходимые настройки для подключения к базе данных (см. `.env.example`)
 ### 3️⃣ Установка зависимостей
 ```sh
-go mod tidy
+go mod download
 make install-deps
 ```
 ### 4️⃣ Запуск PostgreSQL в Docker контейнере
@@ -59,8 +59,8 @@ Swagger-документация API: http://localhost:8080/swagger/index.html (
 | `make start-infra`  | Поднимает инфраструктуру: запускает контейнер БД через `docker-compose up -d`              |
 | `make lint`         | Запускает `golangci-lint run --config .golangci.yml`                                       |
 | `make stop-infra`   | Останавливает инфраструктуру: останавливает контейнеры через `docker-compose down`         |
-| `make goose-up`     | Применяет миграции:                                                                        |
-| `make goose-down`   | Откатывает миграции:                                                                       |
+| `make goose-up`     | Применяет миграции                                                                         |
+| `make goose-down`   | Откатывает миграции                                                                        |
 | `make swagger-gen`  | Генерирует серверный код по OpenAPI-спецификации:                                          |
 | `make proto-gen`    | Генерирует Go и gRPC код по `.proto` файлу                                                 |
 
