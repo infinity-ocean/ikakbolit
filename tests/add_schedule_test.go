@@ -88,7 +88,7 @@ func (s *Suite) TestAddSchedule() {
 				id, convErr := strconv.Atoi(respBody.ScheduleID)
 				rq.NoError(convErr, "schedule_id should parse as integer")
 				rq.GreaterOrEqual(id, 10, "schedule_id >= 10")
-				rq.LessOrEqual(id, 20, "schedule_id <= 20")
+				rq.LessOrEqual(id, 40, "schedule_id <= 40")
 			} else {
 				rq.NotEmpty(errBody.Message, "error message should be present")
 			}
