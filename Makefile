@@ -6,7 +6,7 @@ PROTO_OUT := 3-api-grpc-Homework/grpc/ikakbolit
 POSTGRES_DSN := postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@localhost:$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=$(POSTGRES_SSL)
 
 run:
-	go run cmd/ikakbolit/main.go   
+	docker-compose up --build -d   
 
 start-infra:
 	docker-compose up --build -d
